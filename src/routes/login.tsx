@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, User, Building2 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,8 @@ function LoginPage() {
   const [vorname, setVorname] = useState("");
   const [nachname, setNachname] = useState("");
   const [geburtsdatum, setGeburtsdatum] = useState("");
+  const [kontotyp, setKontotyp] = useState<"privat" | "unternehmen">("privat");
+  const [firma, setFirma] = useState("");
   const [busy, setBusy] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
   const [hinweis, setHinweis] = useState<string | null>(null);
@@ -68,7 +70,7 @@ function LoginPage() {
           setBusy(false);
           return;
         }
-        const { error } = await signUp(email, passwort, { vorname, nachname, geburtsdatum });
+        const { error } = await signUp(email, passwort, { vorname, nachname, geburtsdatum, kontotyp, firma });
         if (error) setFehler(error);
         else {
           setHinweis("Konto erstellt! Falls Bestätigung nötig ist, prüfen Sie Ihr E-Mail-Postfach.");
@@ -121,6 +123,47 @@ function LoginPage() {
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
+            {modus === "registrieren" && (
+              <div>
+                <Label className="text-xs">Ich bin…</Label>
+                <div className="mt-1.5 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setKontotyp("privat")}
+                    className={
+                      "flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition " +
+                      (kontotyp === "privat" ? "border-primary bg-primary/5 font-medium" : "hover:border-foreground/30")
+                    }
+                  >
+                    <User className="h-4 w-4" /> Privatvermieter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setKontotyp("unternehmen")}
+                    className={
+                      "flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition " +
+                      (kontotyp === "unternehmen" ? "border-primary bg-primary/5 font-medium" : "hover:border-foreground/30")
+                    }
+                  >
+                    <Building2 className="h-4 w-4" /> Unternehmen
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {modus === "registrieren" && kontotyp === "unternehmen" && (
+              <div>
+                <Label className="text-xs">Firma</Label>
+                <Input
+                  autoComplete="organization"
+                  required
+                  value={firma}
+                  onChange={(e) => setFirma(e.target.value)}
+                  placeholder="Mustermann Immobilien GmbH"
+                />
+              </div>
+            )}
+
             {modus === "registrieren" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>

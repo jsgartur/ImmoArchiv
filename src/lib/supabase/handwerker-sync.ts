@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Handwerker } from "../store";
 
@@ -34,7 +35,8 @@ export async function fetchHandwerker(): Promise<Handwerker[]> {
 }
 
 export async function insertHandwerker(id: string, h: Handwerker) {
-  const row: Insert = { id, ...handwerkerToRow(h), name: h.name };
+  const user_id = await effektiverEigentuemerId();
+  const row: Insert = { id, user_id, ...handwerkerToRow(h), name: h.name };
   const { error } = await supabase.from("handwerker").insert(row);
   if (error) throw error;
 }

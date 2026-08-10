@@ -5,6 +5,8 @@ import { useStore, fmtEUR, fmtDate, monatKey, monatLabel, type Mieter, type Einh
 import { erwarteteMieteFuerMonat } from "@/lib/immobilienrechner";
 import { MieterPortalDialog } from "@/components/mieter-portal-dialog";
 import { LadeSkeleton } from "@/components/lade-skeleton";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -235,12 +237,26 @@ function MieterportalUebersicht() {
   const einheiten = useStore((s) => s.einheiten);
   const mieter = useStore((s) => s.mieter);
   const geladen = useStore((s) => s.objekteGeladen && s.einheitenGeladen && s.mieterGeladen);
+  const plan = useStore((s) => s.profil.plan);
+  const [detailFuer, setDetailFuer] = useState<string | null>(null);
 
   if (!geladen) {
     return <LadeSkeleton titel="Mieterportal" text="Mieter werden geladen…" />;
   }
 
-  const [detailFuer, setDetailFuer] = useState<string | null>(null);
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mieterportal</h1>
+          <p className="text-sm text-muted-foreground">
+            Zugänge (QR-Code/Code) für alle Ihre Mieter — objektübergreifend an einem Ort erstellen und verwalten.
+          </p>
+        </div>
+        <ProGate feature="Das Mieterportal">{null}</ProGate>
+      </div>
+    );
+  }
 
   const aktive = mieter.filter((m) => !m.mietende || new Date(m.mietende) >= new Date());
 

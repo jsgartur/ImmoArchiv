@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Einheit } from "../store";
 
@@ -36,7 +37,8 @@ export async function fetchEinheiten(): Promise<Einheit[]> {
 }
 
 export async function insertEinheit(id: string, e: Einheit) {
-  const row: EinheitInsert = { id, ...einheitToRow(e), objekt_id: e.objektId, bezeichnung: e.bezeichnung };
+  const user_id = await effektiverEigentuemerId();
+  const row: EinheitInsert = { id, user_id, ...einheitToRow(e), objekt_id: e.objektId, bezeichnung: e.bezeichnung };
   const { error } = await supabase.from("einheiten").insert(row);
   if (error) throw error;
 }

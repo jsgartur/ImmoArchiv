@@ -1,6 +1,7 @@
 import { supabase } from "./client";
 import { STORAGE_BUCKETS } from "./client";
 import { uploadFotos, signedFotoUrls } from "./storage";
+import { effektiverEigentuemerId } from "./team";
 import type { Database, VerlaufEintragRow } from "./types";
 import type { Mangel } from "../store";
 
@@ -53,9 +54,13 @@ export async function fetchMaengel(): Promise<Mangel[]> {
 
 /** Fotos werden vor dem Insert als Base64 übergeben und hier in den Storage-Bucket hochgeladen. */
 export async function insertMangel(id: string, m: Mangel) {
-  const fotoPfade = m.fotos.length > 0 ? await uploadFotos(STORAGE_BUCKETS.mangelFotos, id, m.fotos) : [];
+  const [user_id, fotoPfade] = await Promise.all([
+    effektiverEigentuemerId(),
+    m.fotos.length > 0 ? uploadFotos(STORAGE_BUCKETS.mangelFotos, id, m.fotos) : Promise.resolve([]),
+  ]);
   const row: MangelInsert = {
     id,
+    user_id,
     ...mangelToRow(m),
     einheit_id: m.einheitId,
     titel: m.titel,

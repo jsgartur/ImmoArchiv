@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Mietzahlung } from "../store";
 
@@ -21,10 +22,11 @@ export async function fetchMietzahlungen(): Promise<Mietzahlung[]> {
 
 /** Eine Zahlung je (mieter_id, monat) – erneutes Markieren überschreibt den bestehenden Eintrag. */
 export async function upsertMietzahlung(z: Mietzahlung) {
+  const user_id = await effektiverEigentuemerId();
   const { error } = await supabase
     .from("mietzahlungen")
     .upsert(
-      { mieter_id: z.mieterId, monat: z.monat, betrag: z.betrag, bezahlt_am: z.bezahltAm },
+      { user_id, mieter_id: z.mieterId, monat: z.monat, betrag: z.betrag, bezahlt_am: z.bezahltAm },
       { onConflict: "mieter_id,monat" },
     );
   if (error) throw error;

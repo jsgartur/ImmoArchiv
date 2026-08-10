@@ -18,6 +18,7 @@ function rowToProfil(row: ProfilRow): Profil {
     plz: row.plz ?? "",
     ort: row.ort ?? "",
     land: row.land ?? "Deutschland",
+    kontotyp: row.kontotyp ?? "privat",
     plan: row.plan,
     stripeCustomerId: row.stripe_customer_id ?? undefined,
   };

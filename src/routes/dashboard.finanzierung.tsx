@@ -4,6 +4,8 @@ import { useStore, fmtEUR, fmtEUR0, monatLabel } from "@/lib/store";
 import { berechneTilgung } from "@/lib/immobilienrechner";
 import { DonutCard, AreaCard } from "@/components/charts";
 import { PageTabs, PORTFOLIO_TABS } from "@/components/page-tabs";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 
 export const Route = createFileRoute("/dashboard/finanzierung")({
   component: Finanzierung,
@@ -45,6 +47,7 @@ function Stat({
 
 function Finanzierung() {
   const objekte = useStore((s) => s.objekte);
+  const plan = useStore((s) => s.profil.plan);
 
   const finanziert = objekte
     .map((o) => ({ o, t: berechneTilgung(o) }))
@@ -76,6 +79,19 @@ function Finanzierung() {
     const rest = finanziert.reduce((s, x) => s + berechneTilgung(x.o, stichtag).restschuld, 0);
     return { jahr: heute.getFullYear() + y, rest };
   });
+
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Restschuld & Finanzierung</h1>
+          <p className="text-sm text-muted-foreground">Gesamte Restschuld und Tilgungsprognose Ihrer Objekte.</p>
+        </div>
+        <PageTabs tabs={PORTFOLIO_TABS} />
+        <ProGate feature="Restschuld & Finanzierung">{null}</ProGate>
+      </div>
+    );
+  }
 
   if (finanziert.length === 0) {
     return (

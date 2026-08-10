@@ -195,7 +195,7 @@ export interface Abrechnung {
   erstelltAm: string; // ISO
 }
 
-export type PlanId = "starter" | "professional" | "enterprise";
+export type PlanId = "starter" | "professional";
 
 export interface Profil {
   anrede: string;
@@ -209,6 +209,7 @@ export interface Profil {
   plz: string;
   ort: string;
   land: string;
+  kontotyp: "privat" | "unternehmen";
   plan: PlanId;
   stripeCustomerId?: string;
 }
@@ -225,6 +226,7 @@ export const LEERES_PROFIL: Profil = {
   plz: "",
   ort: "",
   land: "Deutschland",
+  kontotyp: "privat",
   plan: "starter",
 };
 

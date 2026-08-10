@@ -27,6 +27,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SignaturePad } from "@/components/signature-pad";
 import { toast } from "sonner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 
 export const Route = createFileRoute("/dashboard/uebergabe/$id")({
   component: ProtokollEditor,
@@ -122,6 +124,7 @@ function ProtokollEditor() {
   const updateUebergabeprotokoll = useStore((s) => s.updateUebergabeprotokoll);
   const removeUebergabeprotokoll = useStore((s) => s.removeUebergabeprotokoll);
   const geladen = useStore((s) => s.uebergabeprotokolleGeladen);
+  const plan = useStore((s) => s.profil.plan);
   const navigate = useNavigate();
 
   const [typ, setTyp] = useState<UebergabeTyp>(gespeichert?.typ ?? "einzug");
@@ -137,6 +140,13 @@ function ProtokollEditor() {
     return <LadeSkeleton titel="Übergabeprotokoll" text="Details werden geladen…" />;
   }
   if (!gespeichert) throw notFound();
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <ProGate feature="Übergabeprotokolle">{null}</ProGate>
+      </div>
+    );
+  }
 
   const aktuell = {
     ...gespeichert,

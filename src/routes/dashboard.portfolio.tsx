@@ -15,6 +15,8 @@ import { useStore, fmtEUR, fmtEUR0, fmtPct } from "@/lib/store";
 import { berechneKennzahlen, berechneTilgung, portfolioKennzahlen } from "@/lib/immobilienrechner";
 import { DonutCard, AreaCard, BarCard } from "@/components/charts";
 import { PageTabs, PORTFOLIO_TABS } from "@/components/page-tabs";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 
 export const Route = createFileRoute("/dashboard/portfolio")({
   component: Portfolio,
@@ -56,7 +58,21 @@ function Stat({
 
 function Portfolio() {
   const objekte = useStore((s) => s.objekte);
+  const plan = useStore((s) => s.profil.plan);
   const p = portfolioKennzahlen(objekte);
+
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Portfolioübersicht</h1>
+          <p className="text-sm text-muted-foreground">Ihr gesamtes Immobilienvermögen auf einen Blick.</p>
+        </div>
+        <PageTabs tabs={PORTFOLIO_TABS} />
+        <ProGate feature="Portfolio-Auswertungen">{null}</ProGate>
+      </div>
+    );
+  }
 
   if (objekte.length === 0) {
     return (

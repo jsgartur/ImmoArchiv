@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Aufgabe } from "../store";
 
@@ -38,7 +39,8 @@ export async function fetchAufgaben(): Promise<Aufgabe[]> {
 }
 
 export async function insertAufgabe(id: string, a: Aufgabe) {
-  const row: Insert = { id, ...aufgabeToRow(a), titel: a.titel };
+  const user_id = await effektiverEigentuemerId();
+  const row: Insert = { id, user_id, ...aufgabeToRow(a), titel: a.titel };
   const { error } = await supabase.from("aufgaben").insert(row);
   if (error) throw error;
 }

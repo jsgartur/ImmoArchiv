@@ -21,8 +21,9 @@ export const PLAENE: Plan[] = [
     features: [
       "Bis zu 3 Objekte",
       "Objekt- & Mieterverwaltung",
-      "Mieteingänge & Mängel",
-      "Lokale Datenspeicherung",
+      "Mieteingänge, Mängel & Aufgaben",
+      "Nebenkostenabrechnung",
+      "Sichere Cloud-Speicherung",
       "Community-Support",
     ],
     cta: "Kostenlos starten",
@@ -33,34 +34,26 @@ export const PLAENE: Plan[] = [
     preisMonat: 9,
     beschreibung: "Für aktive Vermieter mit mehreren Objekten.",
     features: [
+      "Alles aus Starter",
       "Unbegrenzte Objekte",
       "Restschuld & Tilgungsprognosen",
-      "Dokumente & Bilder ohne Limit",
-      "Auswertungen & Diagramme",
+      "Portfolio-Auswertungen & Diagramme",
       "Mietanpassungs-Rechner",
+      "Übergabeprotokolle & Mieterportal",
+      "KI-Assistent",
+      "Mehrbenutzer & Team-Zugriff",
+      "Datenexport (CSV/PDF)",
       "E-Mail-Support (24 h)",
     ],
     cta: "Professional wählen",
     populaer: true,
   },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    preisMonat: 29,
-    beschreibung: "Für Portfolios und Verwaltung im Team.",
-    features: [
-      "Alles aus Professional",
-      "Mehrbenutzer & Team-Zugriff",
-      "Cloud-Sync & Backups",
-      "Datenexport (CSV/PDF)",
-      "Persönlicher Ansprechpartner",
-      "Priorisierter Support (1 h)",
-    ],
-    cta: "Kontakt aufnehmen",
-  },
 ];
 
 export const planById = (id: PlanId) => PLAENE.find((p) => p.id === id) ?? PLAENE[0];
+
+/** Ob der Plan Zugriff auf die Professional-exklusiven Funktionen hat. */
+export const istPro = (plan: PlanId) => plan === "professional";
 
 /** Effektiver Monatspreis je nach Abrechnungszeitraum. */
 export const monatspreis = (plan: Plan, jaehrlich: boolean) =>

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LadeSkeleton } from "@/components/lade-skeleton";
 import { PageTabs, AUFGABEN_TABS } from "@/components/page-tabs";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 
 export const Route = createFileRoute("/dashboard/uebergabe/")({
   component: UebergabeListe,
@@ -105,9 +107,23 @@ function UebergabeListe() {
   const objekte = useStore((s) => s.objekte);
   const einheiten = useStore((s) => s.einheiten);
   const geladen = useStore((s) => s.uebergabeprotokolleGeladen);
+  const plan = useStore((s) => s.profil.plan);
 
   if (!geladen) {
     return <LadeSkeleton titel="Übergabeprotokolle" text="Ein- und Auszug dokumentieren – mit Fotos und Unterschrift." />;
+  }
+
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Übergabeprotokolle</h1>
+          <p className="text-sm text-muted-foreground">Ein- und Auszug dokumentieren – mit Fotos und Unterschrift.</p>
+        </div>
+        <PageTabs tabs={AUFGABEN_TABS} />
+        <ProGate feature="Übergabeprotokolle">{null}</ProGate>
+      </div>
+    );
   }
 
   const sortiert = protokolle.slice().sort((a, b) => b.datum.localeCompare(a.datum));

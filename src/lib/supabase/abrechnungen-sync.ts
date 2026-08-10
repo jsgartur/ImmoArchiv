@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Abrechnung, NkPartei, NkPosition } from "../store";
 
@@ -38,7 +39,8 @@ export async function fetchAbrechnungen(): Promise<Abrechnung[]> {
 }
 
 export async function insertAbrechnung(id: string, a: Abrechnung) {
-  const row: Insert = { id, ...abrechnungToRow(a), objekt_id: a.objektId, titel: a.titel };
+  const user_id = await effektiverEigentuemerId();
+  const row: Insert = { id, user_id, ...abrechnungToRow(a), objekt_id: a.objektId, titel: a.titel };
   const { error } = await supabase.from("abrechnungen").insert(row);
   if (error) throw error;
 }

@@ -2,10 +2,19 @@ import { useRef, useState, useEffect } from "react";
 import { Sparkles, X, Send, Settings, Loader2, KeyRound, ExternalLink } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { buildKontext, fragKi, getApiKey, setApiKey, KI_SCHNELLFRAGEN, type KiMessage } from "@/lib/ki";
+import { istPro } from "@/lib/plaene";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function KiAssistant() {
+  const { session } = useAuth();
+  const plan = useStore((s) => s.profil.plan);
+  const darfNutzen = !!session && istPro(plan);
+  return darfNutzen ? <KiAssistantInner /> : null;
+}
+
+function KiAssistantInner() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<KiMessage[]>([]);
   const [input, setInput] = useState("");

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { ProGate } from "@/components/pro-gate";
+import { istPro } from "@/lib/plaene";
 
 export const Route = createFileRoute("/dashboard/mietanpassung")({
   component: Mietanpassung,
@@ -18,6 +20,7 @@ function Mietanpassung() {
   const einheiten = useStore((s) => s.einheiten);
   const mieter = useStore((s) => s.mieter);
   const objekte = useStore((s) => s.objekte);
+  const plan = useStore((s) => s.profil.plan);
 
   const [einheitId, setEinheitId] = useState<string>("");
   const [aktuelleKaltmiete, setAktuell] = useState<number>(0);
@@ -67,6 +70,20 @@ function Mietanpassung() {
         wohnflaeche,
       })
     : "";
+
+  if (!istPro(plan)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mietanpassungs-Rechner</h1>
+          <p className="text-sm text-muted-foreground">
+            Berechnung nach § 558 BGB — nachvollziehbar Schritt für Schritt.
+          </p>
+        </div>
+        <ProGate feature="Der Mietanpassungs-Rechner">{null}</ProGate>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

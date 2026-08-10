@@ -394,6 +394,32 @@ function Landing() {
         </div>
       </section>
 
+      {/* Sicherheit */}
+      <section className="border-t border-border/60 bg-card/30">
+        <div className="mx-auto max-w-6xl px-4 py-16">
+          <div className="mx-auto mb-8 max-w-xl text-center">
+            <p className="text-sm font-medium text-blue-600">Sicherheit</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+              Ein sicheres Zuhause für Ihre Daten.
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border bg-background p-5 text-center">
+              <div className="text-sm font-medium">Rechenzentrum in der EU</div>
+              <p className="mt-1 text-xs text-muted-foreground">Kein Datentransfer außerhalb der EU.</p>
+            </div>
+            <div className="rounded-xl border bg-background p-5 text-center">
+              <div className="text-sm font-medium">DSGVO-konform</div>
+              <p className="mt-1 text-xs text-muted-foreground">Inklusive AVV für Ihre Mieterdaten.</p>
+            </div>
+            <div className="rounded-xl border bg-background p-5 text-center">
+              <div className="text-sm font-medium">Verschlüsselte Übertragung</div>
+              <p className="mt-1 text-xs text-muted-foreground">Zugriff nur nach Anmeldung, nur für Sie.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* So funktioniert's */}
       <section id="so-funktionierts" className="border-t border-border/60 bg-card/30">
         <div className="mx-auto max-w-6xl px-4 py-20">

@@ -34,7 +34,8 @@ export interface Database {
           plz: string | null;
           ort: string | null;
           land: string | null;
-          plan: "starter" | "professional" | "enterprise";
+          kontotyp: "privat" | "unternehmen";
+          plan: "starter" | "professional";
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           created_at: string;
@@ -42,6 +43,20 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
+      };
+      team_mitglieder: {
+        Row: {
+          id: string;
+          owner_id: string;
+          user_id: string | null;
+          email: string;
+          rolle: "owner" | "mitglied";
+          status: "eingeladen" | "aktiv";
+          erstellt_am: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["team_mitglieder"]["Row"]> & { owner_id: string; email: string };
+        Update: Partial<Database["public"]["Tables"]["team_mitglieder"]["Row"]>;
         Relationships: [];
       };
       objekte: {

@@ -2,6 +2,7 @@
 // Tabelle public.dokumente mit mieter_id gesetzt. Wird auf Abruf geladen
 // (kein persistierter Store-Slice), da es sich um Dateien statt Stammdaten handelt.
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 
 const BUCKET = "dokumente";
 
@@ -42,9 +43,10 @@ export async function uploadMieterDokument(
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(pfad, file);
   if (uploadError) throw uploadError;
 
+  const user_id = await effektiverEigentuemerId();
   const { data, error } = await supabase
     .from("dokumente")
-    .insert({ mieter_id: mieterId, name: file.name, kategorie, storage_path: pfad, groesse: file.size })
+    .insert({ user_id, mieter_id: mieterId, name: file.name, kategorie, storage_path: pfad, groesse: file.size })
     .select()
     .single();
   if (error) throw error;

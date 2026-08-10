@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database, SondertilgungRow } from "./types";
 import type { Objekt } from "../store";
 
@@ -97,7 +98,8 @@ export async function fetchObjekte(): Promise<Objekt[]> {
 }
 
 export async function insertObjekt(id: string, o: Objekt) {
-  const row: ObjektInsert = { id, ...objektToRow(o), adresse: o.adresse };
+  const user_id = await effektiverEigentuemerId();
+  const row: ObjektInsert = { id, user_id, ...objektToRow(o), adresse: o.adresse };
   const { error } = await supabase.from("objekte").insert(row);
   if (error) throw error;
 }

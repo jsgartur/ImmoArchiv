@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { useStore, LEERES_PROFIL } from "@/lib/store";
+import { nimmEinladungAn } from "@/lib/supabase/team";
 
 /**
  * Lädt die Daten des angemeldeten Nutzers (Objekte, Profil, Einheiten, Mieter, Mängel, …) aus
@@ -22,16 +23,20 @@ export function DatenSync() {
   useEffect(() => {
     if (loading) return;
     if (user) {
-      ladeObjekteVonSupabase();
-      ladeProfilVonSupabase();
-      ladeEinheitenVonSupabase();
-      ladeMieterVonSupabase();
-      ladeMaengelVonSupabase();
-      ladeMietzahlungenVonSupabase();
-      ladeAbrechnungenVonSupabase();
-      ladeAufgabenVonSupabase();
-      ladeHandwerkerVonSupabase();
-      ladeUebergabeprotokolleVonSupabase();
+      // Offene Team-Einladung zuerst annehmen, damit eigentuemer_ids() beim
+      // ersten Laden schon die Daten des Kontoeigentümers mit einschließt.
+      nimmEinladungAn().finally(() => {
+        ladeObjekteVonSupabase();
+        ladeProfilVonSupabase();
+        ladeEinheitenVonSupabase();
+        ladeMieterVonSupabase();
+        ladeMaengelVonSupabase();
+        ladeMietzahlungenVonSupabase();
+        ladeAbrechnungenVonSupabase();
+        ladeAufgabenVonSupabase();
+        ladeHandwerkerVonSupabase();
+        ladeUebergabeprotokolleVonSupabase();
+      });
     } else {
       useStore.setState({
         objekte: [],

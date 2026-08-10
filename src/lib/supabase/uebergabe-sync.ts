@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { effektiverEigentuemerId } from "./team";
 import type { Database } from "./types";
 import type { Uebergabeprotokoll, UebergabeRaum, Zaehlerstand } from "../store";
 
@@ -49,7 +50,8 @@ export async function fetchUebergabeprotokolle(): Promise<Uebergabeprotokoll[]> 
 }
 
 export async function insertUebergabeprotokoll(id: string, p: Uebergabeprotokoll) {
-  const row: Insert = { id, ...protokollToRow(p), einheit_id: p.einheitId, typ: p.typ };
+  const user_id = await effektiverEigentuemerId();
+  const row: Insert = { id, user_id, ...protokollToRow(p), einheit_id: p.einheitId, typ: p.typ };
   const { error } = await supabase.from("uebergabeprotokolle").insert(row);
   if (error) throw error;
 }

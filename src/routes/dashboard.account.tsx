@@ -1,15 +1,112 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { User, ArrowRight, ShieldCheck, Trash2, Loader2, CreditCard } from "lucide-react";
+import { User, ArrowRight, ShieldCheck, Trash2, Loader2, CreditCard, UserPlus, Mail, Clock, CheckCircle2 } from "lucide-react";
 import { useStore, type Profil } from "@/lib/store";
-import { planById, monatspreis } from "@/lib/plaene";
+import { planById, monatspreis, istPro } from "@/lib/plaene";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { supabase } from "@/lib/supabase/client";
+import { fetchTeamMitglieder, ladeMitgliedEin, entferneMitglied, type TeamMitglied } from "@/lib/supabase/team";
+import { ProGate } from "@/components/pro-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+
+function TeamMitgliederKarte() {
+  const [mitglieder, setMitglieder] = useState<TeamMitglied[]>([]);
+  const [geladen, setGeladen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const laden = () => {
+    fetchTeamMitglieder()
+      .then((m) => {
+        setMitglieder(m);
+        setGeladen(true);
+      })
+      .catch(() => setGeladen(true));
+  };
+
+  useEffect(laden, []);
+
+  const einladen = async () => {
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    setBusy(true);
+    try {
+      await ladeMitgliedEin(trimmed);
+      toast.success(`Einladung an ${trimmed} erstellt.`);
+      setEmail("");
+      laden();
+    } catch (e) {
+      toast.error(e instanceof Error && e.message.includes("duplicate") ? "Diese Person ist bereits eingeladen." : "Einladung fehlgeschlagen.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const entfernen = async (id: string) => {
+    try {
+      await entferneMitglied(id);
+      setMitglieder((m) => m.filter((x) => x.id !== id));
+      toast.success("Mitglied entfernt.");
+    } catch {
+      toast.error("Konnte nicht entfernt werden.");
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border bg-card p-5">
+      <div className="mb-1 text-sm font-medium">Team-Mitglieder</div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Eingeladene Personen sehen und bearbeiten dieselben Objekte, Mieter und Daten wie Sie.
+      </p>
+      <div className="flex gap-2">
+        <Input
+          type="email"
+          placeholder="name@beispiel.de"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && einladen()}
+        />
+        <Button onClick={einladen} disabled={busy || !email.trim()}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />} Einladen
+        </Button>
+      </div>
+
+      {geladen && mitglieder.length > 0 && (
+        <div className="mt-4 divide-y rounded-lg border">
+          {mitglieder.map((m) => (
+            <div key={m.id} className="flex items-center justify-between gap-3 p-3 text-sm">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                {m.email}
+              </div>
+              <div className="flex items-center gap-3">
+                <span
+                  className={
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs " +
+                    (m.status === "aktiv" ? "bg-blue-500/10 text-blue-600" : "bg-muted text-muted-foreground")
+                  }
+                >
+                  {m.status === "aktiv" ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                  {m.status === "aktiv" ? "Aktiv" : "Einladung offen"}
+                </span>
+                <Button variant="ghost" size="icon" onClick={() => entfernen(m.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {geladen && mitglieder.length === 0 && (
+        <p className="mt-3 text-xs text-muted-foreground">Noch keine Team-Mitglieder eingeladen.</p>
+      )}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/dashboard/account")({
   component: Account,
@@ -168,8 +265,20 @@ function Account() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Feld label="Geburtsdatum" type="date" value={form.geburtsdatum} onChange={(v) => set("geburtsdatum", v)} />
+            <div>
+              <Label className="text-xs">Kontotyp</Label>
+              <Select value={form.kontotyp} onValueChange={(v) => set("kontotyp", v as Profil["kontotyp"])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="privat">Privatvermieter</SelectItem>
+                  <SelectItem value="unternehmen">Unternehmen</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <Feld label="Firma (optional)" value={form.firma} onChange={(v) => set("firma", v)} />
+          <Feld label={form.kontotyp === "unternehmen" ? "Firma" : "Firma (optional)"} value={form.firma} onChange={(v) => set("firma", v)} />
         </div>
       </div>
 
@@ -192,6 +301,13 @@ function Account() {
         </Button>
         {dirty && <span className="text-xs text-muted-foreground">Ungespeicherte Änderungen</span>}
       </div>
+
+      {/* Team */}
+      {istPro(profil.plan) ? (
+        <TeamMitgliederKarte />
+      ) : (
+        <ProGate feature="Mehrbenutzer & Team-Zugriff">{null}</ProGate>
+      )}
 
       <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-card/50 p-4 text-xs text-muted-foreground">
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />

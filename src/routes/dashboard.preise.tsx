@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Star, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -21,7 +21,6 @@ function Preise() {
   const [checkoutBusy, setCheckoutBusy] = useState<string | null>(null);
   const aktuellerPlan = useStore((s) => s.profil.plan);
   const updateProfil = useStore((s) => s.updateProfil);
-  const navigate = useNavigate();
 
   const starteCheckout = async (planId: "professional") => {
     const priceId = jaehrlich
@@ -51,11 +50,8 @@ function Preise() {
     if (id === "starter") {
       updateProfil({ plan: "starter" });
       toast.success(`Plan „${name}" ausgewählt`);
-    } else if (id === "professional") {
-      starteCheckout("professional");
     } else {
-      toast.info("Für Enterprise sprechen Sie uns bitte direkt an – Kontaktdaten im Impressum.");
-      navigate({ to: "/impressum" });
+      starteCheckout("professional");
     }
   };
 
@@ -64,8 +60,8 @@ function Preise() {
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Preise</h1>
         <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-          Wählen Sie den Plan, der zu Ihnen passt. Alle Pläne enthalten die Kernfunktionen, lokale Datenhaltung und
-          laufende Updates.
+          Wählen Sie den Plan, der zu Ihnen passt. Alle Pläne enthalten sichere Cloud-Speicherung und laufende
+          Updates.
         </p>
 
         {/* Abrechnungs-Umschalter */}
@@ -82,7 +78,7 @@ function Preise() {
       </div>
 
       {/* Karten – gleich hoch dank items-stretch + flex */}
-      <div className="grid items-stretch gap-6 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-3xl items-stretch gap-6 sm:grid-cols-2">
         {PLAENE.map((plan) => {
           const preis = monatspreis(plan, jaehrlich);
           const aktiv = aktuellerPlan === plan.id;
