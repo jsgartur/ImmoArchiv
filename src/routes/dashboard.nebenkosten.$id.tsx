@@ -2,17 +2,19 @@ import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-ro
 import { useState } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   Plus,
   Trash2,
   Printer,
   Save,
-  Users,
   ReceiptText,
   FileDown,
-  RefreshCw,
   User,
   Landmark,
   Check,
+  ChevronUp,
+  ChevronDown,
+  CalendarRange,
 } from "lucide-react";
 import { erzeugeNkPdf } from "@/lib/nk-pdf";
 import {
@@ -49,17 +51,44 @@ const BRIEFPAPIER_AKZENT: Record<BriefpapierId, string> = {
   elegant: "border-amber-600",
 };
 
-const BRIEFPAPIER_SWATCH: Record<BriefpapierId, string> = {
-  klassisch: "bg-blue-600",
-  modern: "bg-slate-900 dark:bg-slate-100",
-  elegant: "bg-amber-600",
-};
-
 const BRIEFPAPIER_FONT: Record<BriefpapierId, string> = {
   klassisch: "",
   modern: "",
   elegant: "font-serif",
 };
+
+/** Kleine Musterrechnung als Vorschau je Briefpapier-Stil (SVG statt echter Bilddatei). */
+function BriefpapierVorschau({ id }: { id: BriefpapierId }) {
+  const akzent = id === "klassisch" ? "#2563eb" : id === "modern" ? "#0f172a" : "#a16207";
+  const schrift = id === "elegant" ? "font-serif" : "font-sans";
+  return (
+    <div
+      className={cn(
+        "aspect-[3/4] w-full overflow-hidden rounded-md border bg-white text-[5px]",
+        schrift,
+      )}
+    >
+      <div style={{ background: akzent }} className="h-2 w-full" />
+      <div className="space-y-1 p-2.5">
+        <div className="h-1 w-1/3 rounded-sm" style={{ background: akzent, opacity: 0.5 }} />
+        <div className="mt-1.5 h-1.5 w-2/3 rounded-sm bg-neutral-800" />
+        <div className="h-1 w-1/2 rounded-sm bg-neutral-300" />
+        <div className="mt-2 space-y-0.5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex justify-between">
+              <div className="h-0.5 w-8 rounded-sm bg-neutral-300" />
+              <div className="h-0.5 w-3 rounded-sm bg-neutral-400" />
+            </div>
+          ))}
+        </div>
+        <div
+          className="mt-2 h-1.5 w-full rounded-sm"
+          style={{ background: akzent, opacity: 0.12 }}
+        />
+      </div>
+    </div>
+  );
+}
 
 function Feldzeile({ label, wert }: { label: string; wert?: string }) {
   return (
@@ -76,24 +105,22 @@ function Feldzeile({ label, wert }: { label: string; wert?: string }) {
   );
 }
 
-function AbsenderKontoKarte({ profil }: { profil: Profil }) {
+function AbsenderKarte({ profil }: { profil: Profil }) {
   const name = [profil.vorname, profil.nachname].filter(Boolean).join(" ");
   const ort = [profil.plz, profil.ort].filter(Boolean).join(" ");
   return (
-    <div className="no-print grid gap-4 rounded-2xl border bg-card p-5 sm:grid-cols-2">
-      <div>
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-          <User className="h-4 w-4" /> Absenderinformationen
-        </div>
-        <div className="space-y-1.5 rounded-xl border bg-background p-3">
-          <Feldzeile label="Firma" wert={profil.firma || undefined} />
-          <Feldzeile label="Name" wert={name || undefined} />
-          <Feldzeile label="Straße" wert={profil.strasse || undefined} />
-          <Feldzeile label="Ort" wert={ort || undefined} />
-        </div>
+    <div className="no-print rounded-2xl border bg-card p-5">
+      <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+        <User className="h-4 w-4" /> Absenderinformationen
       </div>
-      <div>
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+      <div className="space-y-1.5 rounded-xl border bg-background p-3">
+        <Feldzeile label="Firma" wert={profil.firma || undefined} />
+        <Feldzeile label="Name" wert={name || undefined} />
+        <Feldzeile label="Straße" wert={profil.strasse || undefined} />
+        <Feldzeile label="Ort" wert={ort || undefined} />
+      </div>
+      <div className="mt-3 border-t pt-3">
+        <div className="mb-2 flex items-center gap-2 text-sm font-medium">
           <Landmark className="h-4 w-4" /> Kontoinformationen
         </div>
         <div className="space-y-1.5 rounded-xl border bg-background p-3">
@@ -101,44 +128,14 @@ function AbsenderKontoKarte({ profil }: { profil: Profil }) {
           <Feldzeile label="IBAN" wert={profil.iban} />
           <Feldzeile label="BIC" wert={profil.bic} />
         </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Diese Daten befinden sich im{" "}
-          <Link to="/dashboard/account" className="text-primary hover:underline">
-            Benutzerprofil
-          </Link>
-          .
-        </p>
       </div>
-    </div>
-  );
-}
-
-function BriefpapierAuswahl({
-  wert,
-  onChange,
-}: {
-  wert: BriefpapierId;
-  onChange: (v: BriefpapierId) => void;
-}) {
-  return (
-    <div className="no-print rounded-2xl border bg-card p-5">
-      <div className="mb-3 text-sm font-medium">Briefpapier</div>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {(Object.keys(BRIEFPAPIER_LABEL) as BriefpapierId[]).map((id) => (
-          <button
-            key={id}
-            onClick={() => onChange(id)}
-            className={cn(
-              "flex items-center gap-3 rounded-xl border p-3 text-left transition hover:border-foreground/40",
-              wert === id && "border-foreground ring-1 ring-foreground",
-            )}
-          >
-            <span className={cn("h-8 w-8 shrink-0 rounded-md", BRIEFPAPIER_SWATCH[id])} />
-            <span className="flex-1 text-sm font-medium">{BRIEFPAPIER_LABEL[id]}</span>
-            {wert === id && <Check className="h-4 w-4 shrink-0" />}
-          </button>
-        ))}
-      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Diese Daten befinden sich im{" "}
+        <Link to="/dashboard/account" className="text-primary hover:underline">
+          Benutzerprofil
+        </Link>
+        .
+      </p>
     </div>
   );
 }
@@ -152,6 +149,56 @@ export const Route = createFileRoute("/dashboard/nebenkosten/$id")({
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+type Schritt = "anlage" | "empfaenger" | "briefpapier" | "kosten" | "abschluss";
+
+const SCHRITTE: { id: Schritt; label: string }[] = [
+  { id: "anlage", label: "Anlage" },
+  { id: "empfaenger", label: "Absender & Empfänger" },
+  { id: "briefpapier", label: "Briefpapier" },
+  { id: "kosten", label: "Kostenaufstellung" },
+  { id: "abschluss", label: "Prüfung & Abschluss" },
+];
+
+function Stepper({ aktiv, onSelect }: { aktiv: Schritt; onSelect: (s: Schritt) => void }) {
+  const idx = SCHRITTE.findIndex((s) => s.id === aktiv);
+  return (
+    <div className="no-print flex items-start">
+      {SCHRITTE.map((s, i) => (
+        <div key={s.id} className={cn("flex items-center", i < SCHRITTE.length - 1 && "flex-1")}>
+          <button
+            onClick={() => onSelect(s.id)}
+            className="flex shrink-0 flex-col items-center gap-1.5"
+          >
+            <span
+              className={cn(
+                "grid h-7 w-7 place-items-center rounded-full border-2 text-xs font-medium transition",
+                i < idx
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : i === idx
+                    ? "border-primary text-primary"
+                    : "border-muted-foreground/30 text-muted-foreground",
+              )}
+            >
+              {i < idx ? <Check className="h-3.5 w-3.5" /> : i + 1}
+            </span>
+            <span
+              className={cn(
+                "max-w-24 text-center text-[11px] leading-tight",
+                i === idx ? "font-medium text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {s.label}
+            </span>
+          </button>
+          {i < SCHRITTE.length - 1 && (
+            <div className={cn("mx-1 mt-3.5 h-0.5 flex-1", i < idx ? "bg-primary" : "bg-border")} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AbrechnungEditor() {
   const { id } = Route.useParams();
   const gespeichert = useStore((s) => s.abrechnungen.find((a) => a.id === id));
@@ -164,6 +211,7 @@ function AbrechnungEditor() {
   const abrechnungenGeladen = useStore((s) => s.abrechnungenGeladen);
   const navigate = useNavigate();
 
+  const [schritt, setSchritt] = useState<Schritt>("anlage");
   const [titel, setTitel] = useState(gespeichert?.titel ?? "");
   const [von, setVon] = useState(gespeichert?.von ?? "");
   const [bis, setBis] = useState(gespeichert?.bis ?? "");
@@ -189,7 +237,20 @@ function AbrechnungEditor() {
     toast.success("Abrechnung gespeichert");
   };
 
-  // Parteien
+  const schrittIndex = SCHRITTE.findIndex((s) => s.id === schritt);
+  const weiter = () => {
+    if (schrittIndex < SCHRITTE.length - 1) setSchritt(SCHRITTE[schrittIndex + 1].id);
+  };
+  const zurueck = () => {
+    if (schrittIndex > 0) setSchritt(SCHRITTE[schrittIndex - 1].id);
+  };
+
+  // Parteien / Empfänger
+  const einheitenDesObjekts = einheiten.filter((e) => e.objektId === gespeichert.objektId);
+  const mieterDesObjekts = alleMieter.filter((m) =>
+    einheitenDesObjekts.some((e) => e.id === m.einheitId),
+  );
+
   const addPartei = () =>
     setParteien((p) => [
       ...p,
@@ -202,26 +263,20 @@ function AbrechnungEditor() {
   const einheitLabel = (einheitId?: string) =>
     einheitId ? einheiten.find((e) => e.id === einheitId)?.bezeichnung : undefined;
 
-  /** Übernimmt Name/Wohnfläche/NK-Vorauszahlung/Einzug/Auszug erneut aus dem aktuellen Mieter-Datensatz
-   *  (die Partei ist beim Anlegen der Abrechnung nur eine Momentaufnahme – falls sich der Mieter seither
-   *  geändert hat, sind Alt-Werte hier sonst dauerhaft eingefroren). */
-  const syncPartei = (pid: string) => {
-    const p = parteien.find((x) => x.id === pid);
-    if (!p?.einheitId) return;
-    const e = einheiten.find((x) => x.id === p.einheitId);
-    const m = alleMieter.find((x) => x.einheitId === p.einheitId && !x.mietende);
-    if (!e || !m) {
-      toast.error("Kein aktueller Mieter für diese Einheit gefunden.");
-      return;
-    }
+  /** Empfänger auswählen: übernimmt Name/Wohnfläche/NK-Vorauszahlung/Einzug/Auszug automatisch aus dem Mieter-Datensatz. */
+  const mieterZuordnen = (pid: string, mieterId: string) => {
+    const m = mieterDesObjekts.find((x) => x.id === mieterId);
+    if (!m) return;
+    const e = einheiten.find((x) => x.id === m.einheitId);
     setPartei(pid, {
       name: m.name,
-      wohnflaeche: e.wohnflaeche || 0,
+      wohnflaeche: e?.wohnflaeche || 0,
       nkVorausMonat: m.nebenkosten || 0,
       einzug: m.mietbeginn || undefined,
-      auszug: undefined,
+      auszug: m.mietende || undefined,
+      einheitId: m.einheitId,
     });
-    toast.success("Partei mit aktuellen Mieterdaten aktualisiert");
+    toast.success("Empfängerdaten übernommen");
   };
 
   const parteienSortiert = [...parteien].sort((a, b) =>
@@ -229,11 +284,33 @@ function AbrechnungEditor() {
   );
 
   // Positionen
-  const addPosition = (bezeichnung = "", schluessel: Umlageschluessel = "wohnflaeche") =>
-    setPositionen((p) => [...p, { id: uid(), bezeichnung, betrag: 0, schluessel }]);
+  const addPosition = () => {
+    const vorlage =
+      NK_VORLAGEN.find((v) => !positionen.some((p) => p.bezeichnung === v.bezeichnung)) ??
+      NK_VORLAGEN[0];
+    setPositionen((p) => [
+      ...p,
+      {
+        id: uid(),
+        bezeichnung: vorlage.bezeichnung,
+        betrag: 0,
+        schluessel: vorlage.schluessel,
+        datum: new Date().toISOString().slice(0, 10),
+      },
+    ]);
+  };
   const setPosition = (pid: string, patch: Partial<NkPosition>) =>
     setPositionen((list) => list.map((p) => (p.id === pid ? { ...p, ...patch } : p)));
   const removePosition = (pid: string) => setPositionen((list) => list.filter((p) => p.id !== pid));
+  const movePosition = (index: number, richtung: -1 | 1) => {
+    setPositionen((list) => {
+      const ziel = index + richtung;
+      if (ziel < 0 || ziel >= list.length) return list;
+      const next = [...list];
+      [next[index], next[ziel]] = [next[ziel], next[index]];
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -256,7 +333,13 @@ function AbrechnungEditor() {
             <Button variant="outline" onClick={() => erzeugeNkPdf(aktuell, objekt, profil)}>
               <FileDown className="h-4 w-4" /> PDF
             </Button>
-            <Button variant="outline" onClick={() => window.print()}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSchritt("abschluss");
+                setTimeout(() => window.print(), 50);
+              }}
+            >
               <Printer className="h-4 w-4" /> Drucken
             </Button>
             <Button disabled={!dirty} onClick={speichern}>
@@ -279,400 +362,526 @@ function AbrechnungEditor() {
         {dirty && <p className="mt-1 text-xs text-amber-600">Ungespeicherte Änderungen</p>}
       </div>
 
-      {/* Zeitraum */}
       <div className="no-print rounded-2xl border bg-card p-5">
-        <div className="mb-4 text-sm font-medium">Abrechnungszeitraum</div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <Label className="text-xs">Titel</Label>
-            <Input value={titel} onChange={(e) => setTitel(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Von</Label>
-            <Input type="date" value={von.slice(0, 10)} onChange={(e) => setVon(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Bis</Label>
-            <Input type="date" value={bis.slice(0, 10)} onChange={(e) => setBis(e.target.value)} />
-          </div>
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {ergebnis.monate} Monate im Abrechnungszeitraum.
-        </p>
-        {objekt?.kaufdatum && objekt.kaufdatum.slice(0, 10) > bis.slice(0, 10) && (
-          <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
-            Achtung: Das Objekt wurde erst am {fmtDate(objekt.kaufdatum)} gekauft — also nach diesem
-            Abrechnungszeitraum. Für diesen Zeitraum sind keine Nebenkosten angefallen.
-          </p>
-        )}
-        {objekt?.kaufdatum &&
-          objekt.kaufdatum.slice(0, 10) > von.slice(0, 10) &&
-          objekt.kaufdatum.slice(0, 10) <= bis.slice(0, 10) && (
-            <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
-              Hinweis: Kauf am {fmtDate(objekt.kaufdatum)} — Vorauszahlungen werden erst ab dem
-              Kaufdatum anteilig angesetzt.
-            </p>
-          )}
+        <Stepper aktiv={schritt} onSelect={setSchritt} />
       </div>
 
-      <AbsenderKontoKarte profil={profil} />
-      <BriefpapierAuswahl wert={briefpapier} onChange={setBriefpapier} />
-
-      {/* Parteien */}
-      <div className="no-print rounded-2xl border bg-card p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Users className="h-4 w-4" /> Mietparteien
+      {/* Schritt 1: Anlage */}
+      {schritt === "anlage" && (
+        <div className="no-print space-y-4">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-4 flex items-center gap-2 text-sm font-medium">
+              <CalendarRange className="h-4 w-4" /> Abrechnungszeitraum
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label className="text-xs">Titel</Label>
+                <Input value={titel} onChange={(e) => setTitel(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Von</Label>
+                <Input
+                  type="date"
+                  value={von.slice(0, 10)}
+                  onChange={(e) => setVon(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Bis</Label>
+                <Input
+                  type="date"
+                  value={bis.slice(0, 10)}
+                  onChange={(e) => setBis(e.target.value)}
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {ergebnis.monate} Monate im Abrechnungszeitraum.
+            </p>
+            {objekt?.kaufdatum && objekt.kaufdatum.slice(0, 10) > bis.slice(0, 10) && (
+              <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
+                Achtung: Das Objekt wurde erst am {fmtDate(objekt.kaufdatum)} gekauft — also nach
+                diesem Abrechnungszeitraum. Für diesen Zeitraum sind keine Nebenkosten angefallen.
+              </p>
+            )}
+            {objekt?.kaufdatum &&
+              objekt.kaufdatum.slice(0, 10) > von.slice(0, 10) &&
+              objekt.kaufdatum.slice(0, 10) <= bis.slice(0, 10) && (
+                <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
+                  Hinweis: Kauf am {fmtDate(objekt.kaufdatum)} — Vorauszahlungen werden erst ab dem
+                  Kaufdatum anteilig angesetzt.
+                </p>
+              )}
           </div>
-          <Button size="sm" variant="outline" onClick={addPartei}>
-            <Plus className="h-4 w-4" /> Partei
-          </Button>
+          <div className="flex justify-end">
+            <Button onClick={weiter}>
+              Weiter <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Tragen Sie die <strong>monatliche NK-Vorauszahlung</strong> ein sowie – falls der Mieter
-          nicht den ganzen Zeitraum wohnte – <strong>Einzug/Auszug</strong>. Die gezahlte
-          Vorauszahlung wird daraus anteilig berechnet (Einzug am 15. → halber Monat). Das hat
-          nichts mit der Kaution zu tun.
-        </p>
+      )}
 
-        <div className="space-y-3">
-          {parteienSortiert.map((p) => {
-            const vz = gezahlteVorauszahlung(aktuell, p);
-            const etikett = einheitLabel(p.einheitId);
-            return (
-              <div key={p.id} className="rounded-xl border bg-background p-3">
-                {etikett && (
-                  <div className="mb-2 text-[11px] font-medium text-muted-foreground">
-                    {etikett}
-                  </div>
-                )}
-                <div className="grid gap-2 sm:grid-cols-[1fr_90px_80px_36px_36px]">
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Name</Label>
-                    <Input
-                      value={p.name}
-                      onChange={(e) => setPartei(p.id, { name: e.target.value })}
-                      placeholder="Name"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Wohnfl. m²</Label>
-                    <Input
-                      type="number"
-                      value={p.wohnflaeche || ""}
-                      onChange={(e) => setPartei(p.id, { wohnflaeche: +e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Personen</Label>
-                    <Input
-                      type="number"
-                      value={p.personen || ""}
-                      onChange={(e) => setPartei(p.id, { personen: +e.target.value })}
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    {p.einheitId && (
+      {/* Schritt 2: Absender & Empfänger */}
+      {schritt === "empfaenger" && (
+        <div className="no-print space-y-4">
+          <AbsenderKarte profil={profil} />
+
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-sm font-medium">Empfängerinformationen (Mietparteien)</div>
+              <Button size="sm" variant="outline" onClick={addPartei}>
+                <Plus className="h-4 w-4" /> Partei
+              </Button>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Wählen Sie oben je Partei einen Mieter aus Ihrer Mieterliste — Name, Wohnfläche und
+              NK-Vorauszahlung werden automatisch übernommen. Tragen Sie zusätzlich Einzug/Auszug
+              ein, falls der Mieter nicht den ganzen Zeitraum wohnte.
+            </p>
+
+            <div className="space-y-3">
+              {parteienSortiert.map((p) => {
+                const vz = gezahlteVorauszahlung(aktuell, p);
+                const etikett = einheitLabel(p.einheitId);
+                return (
+                  <div key={p.id} className="rounded-xl border bg-background p-3">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <Select value="" onValueChange={(v) => mieterZuordnen(p.id, v)}>
+                        <SelectTrigger className="h-8 max-w-xs text-xs">
+                          <SelectValue
+                            placeholder={
+                              etikett ? `Mieter für ${etikett} wählen …` : "Mieter zuordnen …"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mieterDesObjekts.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.name} — {einheitLabel(m.einheitId) ?? "?"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => syncPartei(p.id)}
-                        aria-label="Mit aktuellem Mieter abgleichen"
-                        title="Mit aktuellem Mieter abgleichen"
+                        onClick={() => removePartei(p.id)}
+                        aria-label="Partei entfernen"
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
-                    )}
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">Name</Label>
+                        <Input
+                          value={p.name}
+                          onChange={(e) => setPartei(p.id, { name: e.target.value })}
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">Wohnfl. m²</Label>
+                        <Input
+                          type="number"
+                          value={p.wohnflaeche || ""}
+                          onChange={(e) => setPartei(p.id, { wohnflaeche: +e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">Personen</Label>
+                        <Input
+                          type="number"
+                          value={p.personen || ""}
+                          onChange={(e) => setPartei(p.id, { personen: +e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">
+                          NK-Vorauszahlung / Monat €
+                        </Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={p.nkVorausMonat ?? ""}
+                          onChange={(e) =>
+                            setPartei(p.id, {
+                              nkVorausMonat: e.target.value === "" ? undefined : +e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">
+                          Einzug (optional)
+                        </Label>
+                        <Input
+                          type="date"
+                          value={p.einzug?.slice(0, 10) ?? ""}
+                          onChange={(e) => setPartei(p.id, { einzug: e.target.value || undefined })}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">
+                          Auszug (optional)
+                        </Label>
+                        <Input
+                          type="date"
+                          value={p.auszug?.slice(0, 10) ?? ""}
+                          onChange={(e) => setPartei(p.id, { auszug: e.target.value || undefined })}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/50 px-3 py-1.5 text-xs">
+                      <span className="text-muted-foreground">
+                        Gezahlte Vorauszahlung: {vz.monate.toLocaleString("de-DE")} Mon. ×{" "}
+                        {fmtEUR(vz.monatlich)}
+                      </span>
+                      <span className="font-medium tabular-nums">{fmtEUR(vz.gesamt)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-end">
+                );
+              })}
+              {parteien.length === 0 && (
+                <p className="text-sm text-muted-foreground">Noch keine Parteien.</p>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={zurueck}>
+              Zurück
+            </Button>
+            <Button onClick={weiter}>
+              Weiter <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Schritt 3: Briefpapier */}
+      {schritt === "briefpapier" && (
+        <div className="no-print space-y-4">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-1 text-sm font-medium">Briefpapier</div>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Wählen Sie ein Layout für Bildschirmvorschau, Druck und PDF-Export.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {(Object.keys(BRIEFPAPIER_LABEL) as BriefpapierId[]).map((bid) => (
+                <button
+                  key={bid}
+                  onClick={() => setBriefpapier(bid)}
+                  className={cn(
+                    "space-y-2 rounded-xl border p-2 text-left transition hover:border-foreground/40",
+                    briefpapier === bid && "border-foreground ring-1 ring-foreground",
+                  )}
+                >
+                  <BriefpapierVorschau id={bid} />
+                  <div className="flex items-center justify-between px-1 pb-1">
+                    <span className="text-sm font-medium">{BRIEFPAPIER_LABEL[bid]}</span>
+                    {briefpapier === bid && <Check className="h-4 w-4 shrink-0" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={zurueck}>
+              Zurück
+            </Button>
+            <Button onClick={weiter}>
+              Weiter <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Schritt 4: Kostenaufstellung */}
+      {schritt === "kosten" && (
+        <div className="no-print space-y-4">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-4 flex items-center gap-2 text-sm font-medium">
+              <ReceiptText className="h-4 w-4" /> Kostenaufstellung
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Kostenart wählen, Betrag und optional Datum/Hinweis ergänzen — die Verteilung auf die
+              Parteien wird automatisch berechnet.
+            </p>
+
+            <div className="hidden gap-2 px-1 pb-2 text-[11px] text-muted-foreground lg:grid lg:grid-cols-[1fr_1fr_120px_110px_170px_72px]">
+              <span>Kostenart</span>
+              <span>Hinweis</span>
+              <span>Datum</span>
+              <span>Gesamtkosten</span>
+              <span>Verteilerschlüssel</span>
+              <span>Aktionen</span>
+            </div>
+            <div className="space-y-2">
+              {positionen.map((pos, index) => (
+                <div
+                  key={pos.id}
+                  className="grid gap-2 rounded-lg border p-2 lg:border-0 lg:p-0 lg:grid-cols-[1fr_1fr_120px_110px_170px_72px]"
+                >
+                  <Select
+                    value={pos.bezeichnung}
+                    onValueChange={(v) => setPosition(pos.id, { bezeichnung: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {NK_VORLAGEN.map((v) => (
+                        <SelectItem key={v.bezeichnung} value={v.bezeichnung}>
+                          {v.bezeichnung}
+                        </SelectItem>
+                      ))}
+                      {!NK_VORLAGEN.some((v) => v.bezeichnung === pos.bezeichnung) && (
+                        <SelectItem value={pos.bezeichnung}>{pos.bezeichnung}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    value={pos.hinweis ?? ""}
+                    onChange={(e) => setPosition(pos.id, { hinweis: e.target.value })}
+                    placeholder="z. B. Belegnummer, Dienstleister"
+                  />
+                  <Input
+                    type="date"
+                    value={pos.datum?.slice(0, 10) ?? ""}
+                    onChange={(e) => setPosition(pos.id, { datum: e.target.value || undefined })}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={pos.betrag || ""}
+                    onChange={(e) => setPosition(pos.id, { betrag: +e.target.value })}
+                  />
+                  <Select
+                    value={pos.schluessel}
+                    onValueChange={(v) =>
+                      setPosition(pos.id, { schluessel: v as Umlageschluessel })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(UMLAGE_LABEL) as Umlageschluessel[]).map((k) => (
+                        <SelectItem key={k} value={k}>
+                          {UMLAGE_LABEL[k]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center justify-end gap-0.5">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removePartei(p.id)}
-                      aria-label="Partei entfernen"
+                      disabled={index === 0}
+                      onClick={() => movePosition(index, -1)}
+                      aria-label="Nach oben"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={index === positionen.length - 1}
+                      onClick={() => movePosition(index, 1)}
+                      aria-label="Nach unten"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePosition(pos.id)}
+                      aria-label="Position entfernen"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
-                <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">
-                      NK-Vorauszahlung / Monat €
-                    </Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={p.nkVorausMonat ?? ""}
-                      onChange={(e) =>
-                        setPartei(p.id, {
-                          nkVorausMonat: e.target.value === "" ? undefined : +e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Einzug (optional)</Label>
-                    <Input
-                      type="date"
-                      value={p.einzug?.slice(0, 10) ?? ""}
-                      onChange={(e) => setPartei(p.id, { einzug: e.target.value || undefined })}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Auszug (optional)</Label>
-                    <Input
-                      type="date"
-                      value={p.auszug?.slice(0, 10) ?? ""}
-                      onChange={(e) => setPartei(p.id, { auszug: e.target.value || undefined })}
-                    />
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/50 px-3 py-1.5 text-xs">
-                  <span className="text-muted-foreground">
-                    Gezahlte Vorauszahlung: {vz.monate.toLocaleString("de-DE")} Mon. ×{" "}
-                    {fmtEUR(vz.monatlich)}
-                  </span>
-                  <span className="font-medium tabular-nums">{fmtEUR(vz.gesamt)}</span>
-                </div>
+              ))}
+              {positionen.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Noch keine Positionen. Fügen Sie unten die erste Kostenart hinzu.
+                </p>
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t pt-3">
+              <Button size="sm" variant="outline" onClick={addPosition}>
+                <Plus className="h-4 w-4" /> Kosten hinzufügen
+              </Button>
+              <div className="text-sm">
+                <span className="text-muted-foreground">Summe: </span>
+                <span className="font-medium tabular-nums">{fmtEUR(ergebnis.gesamtKosten)}</span>
               </div>
-            );
-          })}
-          {parteien.length === 0 && (
-            <p className="text-sm text-muted-foreground">Noch keine Parteien.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Positionen */}
-      <div className="no-print rounded-2xl border bg-card p-5">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <ReceiptText className="h-4 w-4" /> Kostenpositionen
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Select
-              onValueChange={(v) => {
-                const vorlage = NK_VORLAGEN.find((x) => x.bezeichnung === v);
-                if (vorlage) addPosition(vorlage.bezeichnung, vorlage.schluessel);
-              }}
-            >
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder="Typische Position hinzufügen …" />
-              </SelectTrigger>
-              <SelectContent>
-                {NK_VORLAGEN.map((v) => (
-                  <SelectItem key={v.bezeichnung} value={v.bezeichnung}>
-                    {v.bezeichnung}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button size="sm" variant="outline" onClick={() => addPosition()}>
-              <Plus className="h-4 w-4" /> Frei
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={zurueck}>
+              Zurück
+            </Button>
+            <Button onClick={weiter}>
+              Weiter <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
+      )}
 
-        <div className="hidden gap-2 px-1 pb-2 text-[11px] text-muted-foreground sm:grid sm:grid-cols-[1fr_120px_180px_36px]">
-          <span>Bezeichnung</span>
-          <span>Betrag €</span>
-          <span>Umlage nach</span>
-          <span />
+      {/* Schritt 5: Prüfung & Abschluss */}
+      {schritt === "abschluss" && (
+        <div className="no-print flex justify-start">
+          <Button variant="outline" onClick={zurueck}>
+            Zurück
+          </Button>
         </div>
-        <div className="space-y-2">
-          {positionen.map((pos) => (
-            <div key={pos.id} className="grid gap-2 sm:grid-cols-[1fr_120px_180px_36px]">
-              <Input
-                value={pos.bezeichnung}
-                onChange={(e) => setPosition(pos.id, { bezeichnung: e.target.value })}
-                placeholder="z. B. Grundsteuer"
-              />
-              <Input
-                type="number"
-                step="0.01"
-                value={pos.betrag || ""}
-                onChange={(e) => setPosition(pos.id, { betrag: +e.target.value })}
-              />
-              <Select
-                value={pos.schluessel}
-                onValueChange={(v) => setPosition(pos.id, { schluessel: v as Umlageschluessel })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(UMLAGE_LABEL) as Umlageschluessel[]).map((k) => (
-                    <SelectItem key={k} value={k}>
-                      {UMLAGE_LABEL[k]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removePosition(pos.id)}
-                aria-label="Position entfernen"
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+      )}
+      {schritt === "abschluss" && (
+        <div
+          className={cn(
+            "nk-print rounded-2xl border border-t-4 bg-card p-6",
+            BRIEFPAPIER_AKZENT[briefpapier],
+            BRIEFPAPIER_FONT[briefpapier],
+          )}
+        >
+          <div className="mb-6 border-b pb-4">
+            <div className="text-xs text-muted-foreground">
+              {[profil.vorname, profil.nachname].filter(Boolean).join(" ") || "Vermieter/in"}
+              {profil.strasse ? ` · ${profil.strasse}` : ""}
+              {profil.plz || profil.ort ? ` · ${profil.plz} ${profil.ort}` : ""}
             </div>
-          ))}
-          {positionen.length === 0 && (
+            <h2 className="mt-2 text-xl font-semibold">{titel || "Nebenkostenabrechnung"}</h2>
             <p className="text-sm text-muted-foreground">
-              Noch keine Positionen. Über „Typische Position hinzufügen" starten Sie mit den
-              üblichen Betriebskosten.
+              {objekt?.adresse} · Zeitraum {fmtDate(von)} – {fmtDate(bis)}
             </p>
+          </div>
+
+          {ergebnis.parteien.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Fügen Sie Parteien und Positionen hinzu, um das Ergebnis zu sehen.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {[...ergebnis.parteien]
+                .sort((a, b) =>
+                  (einheitLabel(a.partei.einheitId) ?? a.partei.name).localeCompare(
+                    einheitLabel(b.partei.einheitId) ?? b.partei.name,
+                  ),
+                )
+                .map((pe) => (
+                  <div key={pe.partei.id} className="rounded-xl border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <div className="font-medium">{pe.partei.name}</div>
+                        {einheitLabel(pe.partei.einheitId) && (
+                          <div className="text-xs text-muted-foreground">
+                            {einheitLabel(pe.partei.einheitId)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {pe.partei.wohnflaeche} m² · {pe.partei.personen} Pers.
+                      </div>
+                    </div>
+
+                    <table className="mt-3 w-full text-sm">
+                      <tbody>
+                        {pe.anteile.map((an) => (
+                          <tr key={an.positionId} className="border-b last:border-none">
+                            <td className="py-1.5 text-muted-foreground">
+                              {an.bezeichnung || "—"}
+                              <span className="ml-1 text-[11px]">
+                                ({UMLAGE_LABEL[an.schluessel]})
+                              </span>
+                            </td>
+                            <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
+                              von {fmtEUR(an.gesamt)}
+                            </td>
+                            <td className="w-28 py-1.5 text-right font-medium tabular-nums">
+                              {fmtEUR(an.anteil)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <div className="mt-3 space-y-1 border-t pt-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Umlagefähige Kosten (Anteil)</span>
+                        <span className="tabular-nums font-medium">{fmtEUR(pe.gesamtKosten)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Gezahlte NK-Vorauszahlung
+                          {pe.nkVorausMonat > 0 && (
+                            <span className="ml-1 text-xs">
+                              ({pe.monateAnteilig.toLocaleString("de-DE")} Mon. ×{" "}
+                              {fmtEUR(pe.nkVorausMonat)})
+                            </span>
+                          )}
+                        </span>
+                        <span className="tabular-nums">− {fmtEUR(pe.vorauszahlung)}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-1.5 text-base font-semibold">
+                        <span>{pe.saldo >= 0 ? "Guthaben" : "Nachzahlung"}</span>
+                        <span
+                          className={
+                            "tabular-nums " + (pe.saldo >= 0 ? "text-blue-600" : "text-destructive")
+                          }
+                        >
+                          {fmtEUR(Math.abs(pe.saldo))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+              <div className="rounded-xl bg-secondary/50 p-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Gesamtkosten</span>
+                  <span className="tabular-nums font-medium">{fmtEUR(ergebnis.gesamtKosten)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Summe Vorauszahlungen</span>
+                  <span className="tabular-nums">{fmtEUR(ergebnis.gesamtVorauszahlung)}</span>
+                </div>
+                <div className="mt-1 flex justify-between border-t pt-1.5 font-semibold">
+                  <span>Gesamtsaldo</span>
+                  <span
+                    className={
+                      "tabular-nums " +
+                      (ergebnis.gesamtSaldo >= 0 ? "text-blue-600" : "text-destructive")
+                    }
+                  >
+                    {ergebnis.gesamtSaldo >= 0 ? "Guthaben " : "Nachzahlung "}
+                    {fmtEUR(Math.abs(ergebnis.gesamtSaldo))}
+                  </span>
+                </div>
+              </div>
+
+              {(profil.iban || profil.kontoinhaber) && (
+                <div className="rounded-xl border p-4 text-sm">
+                  <div className="mb-1.5 text-xs font-medium text-muted-foreground">
+                    Zahlungsangaben
+                  </div>
+                  {profil.kontoinhaber && <div>Kontoinhaber: {profil.kontoinhaber}</div>}
+                  {profil.iban && <div>IBAN: {profil.iban}</div>}
+                  {profil.bic && <div>BIC: {profil.bic}</div>}
+                </div>
+              )}
+
+              <p className="text-[11px] text-muted-foreground">
+                Hinweis: Nur tatsächlich umlagefähige Betriebskosten (§ 2 BetrKV) dürfen umgelegt
+                werden. Diese Abrechnung ist eine Rechenhilfe und ersetzt keine rechtliche Prüfung.
+              </p>
+            </div>
           )}
         </div>
-        <div className="mt-4 flex justify-between border-t pt-3 text-sm">
-          <span className="text-muted-foreground">Summe aller Positionen</span>
-          <span className="font-medium tabular-nums">{fmtEUR(ergebnis.gesamtKosten)}</span>
-        </div>
-      </div>
-
-      {/* Ergebnis (druckbar) */}
-      <div
-        className={cn(
-          "nk-print rounded-2xl border border-t-4 bg-card p-6",
-          BRIEFPAPIER_AKZENT[briefpapier],
-          BRIEFPAPIER_FONT[briefpapier],
-        )}
-      >
-        <div className="mb-6 border-b pb-4">
-          <div className="text-xs text-muted-foreground">
-            {[profil.vorname, profil.nachname].filter(Boolean).join(" ") || "Vermieter/in"}
-            {profil.strasse ? ` · ${profil.strasse}` : ""}
-            {profil.plz || profil.ort ? ` · ${profil.plz} ${profil.ort}` : ""}
-          </div>
-          <h2 className="mt-2 text-xl font-semibold">{titel || "Nebenkostenabrechnung"}</h2>
-          <p className="text-sm text-muted-foreground">
-            {objekt?.adresse} · Zeitraum {fmtDate(von)} – {fmtDate(bis)}
-          </p>
-        </div>
-
-        {ergebnis.parteien.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Fügen Sie Parteien und Positionen hinzu, um das Ergebnis zu sehen.
-          </p>
-        ) : (
-          <div className="space-y-6">
-            {[...ergebnis.parteien]
-              .sort((a, b) =>
-                (einheitLabel(a.partei.einheitId) ?? a.partei.name).localeCompare(
-                  einheitLabel(b.partei.einheitId) ?? b.partei.name,
-                ),
-              )
-              .map((pe) => (
-                <div key={pe.partei.id} className="rounded-xl border p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <div className="font-medium">{pe.partei.name}</div>
-                      {einheitLabel(pe.partei.einheitId) && (
-                        <div className="text-xs text-muted-foreground">
-                          {einheitLabel(pe.partei.einheitId)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {pe.partei.wohnflaeche} m² · {pe.partei.personen} Pers.
-                    </div>
-                  </div>
-
-                  <table className="mt-3 w-full text-sm">
-                    <tbody>
-                      {pe.anteile.map((an) => (
-                        <tr key={an.positionId} className="border-b last:border-none">
-                          <td className="py-1.5 text-muted-foreground">
-                            {an.bezeichnung || "—"}
-                            <span className="ml-1 text-[11px]">
-                              ({UMLAGE_LABEL[an.schluessel]})
-                            </span>
-                          </td>
-                          <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
-                            von {fmtEUR(an.gesamt)}
-                          </td>
-                          <td className="w-28 py-1.5 text-right font-medium tabular-nums">
-                            {fmtEUR(an.anteil)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div className="mt-3 space-y-1 border-t pt-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Umlagefähige Kosten (Anteil)</span>
-                      <span className="tabular-nums font-medium">{fmtEUR(pe.gesamtKosten)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Gezahlte NK-Vorauszahlung
-                        {pe.nkVorausMonat > 0 && (
-                          <span className="ml-1 text-xs">
-                            ({pe.monateAnteilig.toLocaleString("de-DE")} Mon. ×{" "}
-                            {fmtEUR(pe.nkVorausMonat)})
-                          </span>
-                        )}
-                      </span>
-                      <span className="tabular-nums">− {fmtEUR(pe.vorauszahlung)}</span>
-                    </div>
-                    <div className="flex justify-between border-t pt-1.5 text-base font-semibold">
-                      <span>{pe.saldo >= 0 ? "Guthaben" : "Nachzahlung"}</span>
-                      <span
-                        className={
-                          "tabular-nums " + (pe.saldo >= 0 ? "text-blue-600" : "text-destructive")
-                        }
-                      >
-                        {fmtEUR(Math.abs(pe.saldo))}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            <div className="rounded-xl bg-secondary/50 p-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Gesamtkosten</span>
-                <span className="tabular-nums font-medium">{fmtEUR(ergebnis.gesamtKosten)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Summe Vorauszahlungen</span>
-                <span className="tabular-nums">{fmtEUR(ergebnis.gesamtVorauszahlung)}</span>
-              </div>
-              <div className="mt-1 flex justify-between border-t pt-1.5 font-semibold">
-                <span>Gesamtsaldo</span>
-                <span
-                  className={
-                    "tabular-nums " +
-                    (ergebnis.gesamtSaldo >= 0 ? "text-blue-600" : "text-destructive")
-                  }
-                >
-                  {ergebnis.gesamtSaldo >= 0 ? "Guthaben " : "Nachzahlung "}
-                  {fmtEUR(Math.abs(ergebnis.gesamtSaldo))}
-                </span>
-              </div>
-            </div>
-
-            {(profil.iban || profil.kontoinhaber) && (
-              <div className="rounded-xl border p-4 text-sm">
-                <div className="mb-1.5 text-xs font-medium text-muted-foreground">
-                  Zahlungsangaben
-                </div>
-                {profil.kontoinhaber && <div>Kontoinhaber: {profil.kontoinhaber}</div>}
-                {profil.iban && <div>IBAN: {profil.iban}</div>}
-                {profil.bic && <div>BIC: {profil.bic}</div>}
-              </div>
-            )}
-
-            <p className="text-[11px] text-muted-foreground">
-              Hinweis: Nur tatsächlich umlagefähige Betriebskosten (§ 2 BetrKV) dürfen umgelegt
-              werden. Diese Abrechnung ist eine Rechenhilfe und ersetzt keine rechtliche Prüfung.
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

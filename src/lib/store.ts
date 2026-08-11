@@ -164,19 +164,27 @@ export const UMLAGE_LABEL: Record<Umlageschluessel, string> = {
 };
 
 /** Typische umlagefähige Betriebskosten nach BetrKV – für Schnell-Auswahl. */
+/** Vollständiger Betriebskostenkatalog nach § 2 BetrKV (17 Kostenarten) für die Schnellauswahl. */
 export const NK_VORLAGEN: { bezeichnung: string; schluessel: Umlageschluessel }[] = [
   { bezeichnung: "Grundsteuer", schluessel: "wohnflaeche" },
-  { bezeichnung: "Wasser / Abwasser", schluessel: "personen" },
-  { bezeichnung: "Müllabfuhr", schluessel: "personen" },
-  { bezeichnung: "Straßenreinigung", schluessel: "wohnflaeche" },
-  { bezeichnung: "Hausreinigung", schluessel: "wohnflaeche" },
-  { bezeichnung: "Gartenpflege", schluessel: "wohnflaeche" },
-  { bezeichnung: "Allgemeinstrom", schluessel: "wohnflaeche" },
-  { bezeichnung: "Heizung / Warmwasser", schluessel: "wohnflaeche" },
+  { bezeichnung: "Wasserversorgung (Frischwasser)", schluessel: "personen" },
+  { bezeichnung: "Entwässerung (Abwasser/Niederschlag)", schluessel: "personen" },
+  { bezeichnung: "Heizung", schluessel: "wohnflaeche" },
+  { bezeichnung: "Warmwasser", schluessel: "wohnflaeche" },
+  { bezeichnung: "Heiz- und Warmwasserkosten (verbunden)", schluessel: "wohnflaeche" },
   { bezeichnung: "Aufzug", schluessel: "wohnflaeche" },
-  { bezeichnung: "Gebäudeversicherung", schluessel: "wohnflaeche" },
-  { bezeichnung: "Hausmeister", schluessel: "wohnflaeche" },
+  { bezeichnung: "Straßenreinigung", schluessel: "wohnflaeche" },
+  { bezeichnung: "Müllbeseitigung", schluessel: "personen" },
+  { bezeichnung: "Gebäudereinigung/Ungezieferbekämpfung", schluessel: "wohnflaeche" },
+  { bezeichnung: "Gartenpflege", schluessel: "wohnflaeche" },
+  { bezeichnung: "Allgemeinstrom (Beleuchtung)", schluessel: "wohnflaeche" },
   { bezeichnung: "Schornsteinfeger", schluessel: "wohnflaeche" },
+  { bezeichnung: "Sach- und Haftpflichtversicherung", schluessel: "wohnflaeche" },
+  { bezeichnung: "Hauswart/Hausmeister", schluessel: "wohnflaeche" },
+  { bezeichnung: "Antenne/Kabelanschluss", schluessel: "wohnflaeche" },
+  { bezeichnung: "Waschküche", schluessel: "einheiten" },
+  { bezeichnung: "Winterdienst", schluessel: "wohnflaeche" },
+  { bezeichnung: "Sonstige Betriebskosten", schluessel: "wohnflaeche" },
 ];
 
 export interface NkPosition {
@@ -184,6 +192,8 @@ export interface NkPosition {
   bezeichnung: string;
   betrag: number; // Gesamtkosten der Position im Zeitraum (€)
   schluessel: Umlageschluessel;
+  hinweis?: string; // frei, z. B. Belegnummer/Dienstleister
+  datum?: string; // ISO – Rechnungs-/Erfassungsdatum
 }
 
 export interface NkPartei {
