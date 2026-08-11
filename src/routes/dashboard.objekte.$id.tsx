@@ -1,6 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Plus, Trash2, User, AlertTriangle, Pencil, CheckCircle2, Circle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  User,
+  AlertTriangle,
+  Pencil,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 import { differenceInMonths, parseISO } from "date-fns";
 import {
   useStore,
@@ -11,12 +21,22 @@ import {
   monatLabel,
   OBJEKTTYP_LABEL,
   type Einheit,
-  type Mieter,
 } from "@/lib/store";
-import { berechneKennzahlen, berechneTilgung, erwarteteMieteFuerMonat } from "@/lib/immobilienrechner";
+import {
+  berechneKennzahlen,
+  berechneTilgung,
+  erwarteteMieteFuerMonat,
+} from "@/lib/immobilienrechner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +45,7 @@ import { Dokumente } from "@/components/dokumente";
 import { Bilder } from "@/components/bilder";
 import { DonutCard } from "@/components/charts";
 import { MieterPortalDialog } from "@/components/mieter-portal-dialog";
+import { MieterDialog } from "@/components/mieter-dialog";
 
 export const Route = createFileRoute("/dashboard/objekte/$id")({
   component: ObjektDetail,
@@ -45,19 +66,48 @@ function EinheitDialog({ objektId }: { objektId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline"><Plus className="h-4 w-4" />Einheit</Button>
+        <Button size="sm" variant="outline">
+          <Plus className="h-4 w-4" />
+          Einheit
+        </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Neue Einheit</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Neue Einheit</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
             <Label>Bezeichnung</Label>
-            <Input placeholder="EG links" value={form.bezeichnung} onChange={(e) => setForm({ ...form, bezeichnung: e.target.value })} />
+            <Input
+              placeholder="EG links"
+              value={form.bezeichnung}
+              onChange={(e) => setForm({ ...form, bezeichnung: e.target.value })}
+            />
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div><Label>Wohnfläche (m²)</Label><Input type="number" value={form.wohnflaeche || ""} onChange={(e) => setForm({ ...form, wohnflaeche: +e.target.value })} /></div>
-            <div><Label>Zimmer</Label><Input type="number" value={form.zimmer || ""} onChange={(e) => setForm({ ...form, zimmer: +e.target.value })} /></div>
-            <div><Label>Stockwerk</Label><Input value={form.stockwerk ?? ""} onChange={(e) => setForm({ ...form, stockwerk: e.target.value })} /></div>
+            <div>
+              <Label>Wohnfläche (m²)</Label>
+              <Input
+                type="number"
+                value={form.wohnflaeche || ""}
+                onChange={(e) => setForm({ ...form, wohnflaeche: +e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Zimmer</Label>
+              <Input
+                type="number"
+                value={form.zimmer || ""}
+                onChange={(e) => setForm({ ...form, zimmer: +e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Stockwerk</Label>
+              <Input
+                value={form.stockwerk ?? ""}
+                onChange={(e) => setForm({ ...form, stockwerk: e.target.value })}
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -67,58 +117,6 @@ function EinheitDialog({ objektId }: { objektId: string }) {
               addEinheit({ ...form, objektId });
               setOpen(false);
               setForm({ bezeichnung: "", wohnflaeche: 0, zimmer: 0, stockwerk: "" });
-            }}
-          >
-            Speichern
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function MieterDialog({ einheitId, existing }: { einheitId: string; existing?: Mieter }) {
-  const [open, setOpen] = useState(false);
-  const addMieter = useStore((s) => s.addMieter);
-  const updateMieter = useStore((s) => s.updateMieter);
-  const [form, setForm] = useState<Omit<Mieter, "id" | "einheitId">>(
-    existing
-      ? { name: existing.name, kontakt: existing.kontakt, telefon: existing.telefon, email: existing.email, mietbeginn: existing.mietbeginn, mietende: existing.mietende, kaltmiete: existing.kaltmiete, nebenkosten: existing.nebenkosten, kaution: existing.kaution }
-      : { name: "", telefon: "", email: "", mietbeginn: new Date().toISOString().slice(0, 10), mietende: "", kaltmiete: 0, nebenkosten: 0, kaution: 0 },
-  );
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant={existing ? "ghost" : "default"}>
-          {existing ? "Bearbeiten" : (<><Plus className="h-4 w-4" />Mieter</>)}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader><DialogTitle>{existing ? "Mieter bearbeiten" : "Neuer Mieter"}</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <div><Label>Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Telefon</Label><Input value={form.telefon ?? ""} onChange={(e) => setForm({ ...form, telefon: e.target.value })} /></div>
-            <div><Label>E-Mail</Label><Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Mietbeginn</Label><Input type="date" value={form.mietbeginn?.slice(0, 10) ?? ""} onChange={(e) => setForm({ ...form, mietbeginn: e.target.value })} /></div>
-            <div><Label>Mietende (optional)</Label><Input type="date" value={form.mietende?.slice(0, 10) ?? ""} onChange={(e) => setForm({ ...form, mietende: e.target.value })} /></div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div><Label>Kaltmiete €</Label><Input type="number" step="0.01" value={form.kaltmiete || ""} onChange={(e) => setForm({ ...form, kaltmiete: +e.target.value })} /></div>
-            <div><Label>Nebenkosten €</Label><Input type="number" step="0.01" value={form.nebenkosten || ""} onChange={(e) => setForm({ ...form, nebenkosten: +e.target.value })} /></div>
-            <div><Label>Kaution €</Label><Input type="number" step="0.01" value={form.kaution || ""} onChange={(e) => setForm({ ...form, kaution: +e.target.value })} /></div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={!form.name.trim()}
-            onClick={() => {
-              if (existing) updateMieter(existing.id, form);
-              else addMieter({ ...form, einheitId });
-              setOpen(false);
             }}
           >
             Speichern
@@ -191,20 +189,28 @@ function ObjektDetail() {
     .filter((m) => einheitenIds.includes(m.einheitId))
     .map((m) => ({ mieter: m, betrag: erwarteteMieteFuerMonat(m, mKey) }))
     .filter((z) => z.betrag > 0);
-  const istBezahlt = (mieterId: string) => mietzahlungen.some((z) => z.mieterId === mieterId && z.monat === mKey);
+  const istBezahlt = (mieterId: string) =>
+    mietzahlungen.some((z) => z.mieterId === mieterId && z.monat === mKey);
 
   return (
     <div className="space-y-6">
       <div>
-        <Link to="/dashboard/objekte" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/dashboard/objekte"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Alle Objekte
         </Link>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{objekt.adresse}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                {objekt.adresse}
+              </h1>
               {objekt.vermietet ? (
-                <Badge variant="outline" className="border-blue-500/40 text-blue-600">vermietet</Badge>
+                <Badge variant="outline" className="border-blue-500/40 text-blue-600">
+                  vermietet
+                </Badge>
               ) : (
                 <Badge variant="outline">frei</Badge>
               )}
@@ -246,8 +252,16 @@ function ObjektDetail() {
 
       {/* Kennzahlen */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KennzahlKarte label="Kaufpreis" value={k.kaufpreis > 0 ? fmtEUR(k.kaufpreis) : "—"} hint={k.gesamtinvestition > 0 ? `inkl. NK: ${fmtEUR(k.gesamtinvestition)}` : undefined} />
-        <KennzahlKarte label="Preis pro m²" value={k.preisProQm != null ? fmtEUR(k.preisProQm) : "—"} hint={k.mieteProQm != null ? `Miete ${fmtEUR(k.mieteProQm)}/m²` : undefined} />
+        <KennzahlKarte
+          label="Kaufpreis"
+          value={k.kaufpreis > 0 ? fmtEUR(k.kaufpreis) : "—"}
+          hint={k.gesamtinvestition > 0 ? `inkl. NK: ${fmtEUR(k.gesamtinvestition)}` : undefined}
+        />
+        <KennzahlKarte
+          label="Preis pro m²"
+          value={k.preisProQm != null ? fmtEUR(k.preisProQm) : "—"}
+          hint={k.mieteProQm != null ? `Miete ${fmtEUR(k.mieteProQm)}/m²` : undefined}
+        />
         <KennzahlKarte
           label="Rendite"
           value={k.bruttorendite != null ? fmtPct(k.bruttorendite) : "—"}
@@ -267,25 +281,51 @@ function ObjektDetail() {
           <div className="mb-3 text-sm font-medium">Kauf & Finanzierung</div>
           <Zeile label="Kaufpreis" value={k.kaufpreis > 0 ? fmtEUR(k.kaufpreis) : "—"} />
           <Zeile label="Aktueller Marktwert" value={k.marktwert > 0 ? fmtEUR(k.marktwert) : "—"} />
-          <Zeile label="Kaufnebenkosten" value={k.kaufnebenkosten > 0 ? fmtEUR(k.kaufnebenkosten) : "—"} />
-          <Zeile label="Gesamtinvestition" value={k.gesamtinvestition > 0 ? fmtEUR(k.gesamtinvestition) : "—"} />
-          <Zeile label="Eigenkapital" value={k.eigenkapital != null ? fmtEUR(k.eigenkapital) : "—"} />
+          <Zeile
+            label="Kaufnebenkosten"
+            value={k.kaufnebenkosten > 0 ? fmtEUR(k.kaufnebenkosten) : "—"}
+          />
+          <Zeile
+            label="Gesamtinvestition"
+            value={k.gesamtinvestition > 0 ? fmtEUR(k.gesamtinvestition) : "—"}
+          />
+          <Zeile
+            label="Eigenkapital"
+            value={k.eigenkapital != null ? fmtEUR(k.eigenkapital) : "—"}
+          />
           <Zeile label="Darlehen" value={k.darlehen != null ? fmtEUR(k.darlehen) : "—"} />
-          <Zeile label="Zinssatz p. a." value={objekt.zinssatz != null ? fmtPct(objekt.zinssatz) : "—"} />
+          <Zeile
+            label="Zinssatz p. a."
+            value={objekt.zinssatz != null ? fmtPct(objekt.zinssatz) : "—"}
+          />
           <Zeile label="Bank" value={objekt.bank || "—"} />
-          <Zeile label="Zinsbindung bis" value={objekt.zinsbindungBis ? fmtDate(objekt.zinsbindungBis) : "—"} />
+          <Zeile
+            label="Zinsbindung bis"
+            value={objekt.zinsbindungBis ? fmtDate(objekt.zinsbindungBis) : "—"}
+          />
           <Zeile label="Bankrate / Monat" value={k.rateMonat > 0 ? fmtEUR(k.rateMonat) : "—"} />
-          {k.bausparBetragMonat > 0 && <Zeile label="Bausparrate / Monat" value={fmtEUR(k.bausparBetragMonat)} />}
+          {k.bausparBetragMonat > 0 && (
+            <Zeile label="Bausparrate / Monat" value={fmtEUR(k.bausparBetragMonat)} />
+          )}
           {(objekt.sondertilgungen?.length ?? 0) > 0 && (
             <Zeile
               label={`Sondertilgungen (${objekt.sondertilgungen!.length})`}
               value={fmtEUR(objekt.sondertilgungen!.reduce((s, x) => s + (x.betrag || 0), 0))}
             />
           )}
-          <Zeile label="Laufende Kosten / Monat" value={k.laufendeKostenMonat > 0 ? fmtEUR(k.laufendeKostenMonat) : "—"} />
-          <Zeile label="Mietmultiplikator" value={k.mietmultiplikator != null ? `${k.mietmultiplikator.toFixed(1)}-fach` : "—"} />
+          <Zeile
+            label="Laufende Kosten / Monat"
+            value={k.laufendeKostenMonat > 0 ? fmtEUR(k.laufendeKostenMonat) : "—"}
+          />
+          <Zeile
+            label="Mietmultiplikator"
+            value={k.mietmultiplikator != null ? `${k.mietmultiplikator.toFixed(1)}-fach` : "—"}
+          />
           <Zeile label="Beleihungsauslauf (LTV)" value={k.ltv != null ? fmtPct(k.ltv) : "—"} />
-          <Zeile label="Eigenkapitalquote" value={k.eigenkapitalquote != null ? fmtPct(k.eigenkapitalquote) : "—"} />
+          <Zeile
+            label="Eigenkapitalquote"
+            value={k.eigenkapitalquote != null ? fmtPct(k.eigenkapitalquote) : "—"}
+          />
         </div>
 
         {/* Vermietung */}
@@ -296,20 +336,30 @@ function ObjektDetail() {
             label={objekt.vermietet ? "Aktuelle Kaltmiete / Monat" : "Zielmiete / Monat"}
             value={k.monatskaltmiete > 0 ? fmtEUR(k.monatskaltmiete) : "—"}
           />
-          <Zeile label="Kaltmiete / Jahr" value={k.jahreskaltmiete > 0 ? fmtEUR(k.jahreskaltmiete) : "—"} />
+          <Zeile
+            label="Kaltmiete / Jahr"
+            value={k.jahreskaltmiete > 0 ? fmtEUR(k.jahreskaltmiete) : "—"}
+          />
           <Zeile
             label="Nebenkosten / Monat"
             value={objekt.nebenkostenVorauszahlung ? fmtEUR(objekt.nebenkostenVorauszahlung) : "—"}
           />
           <Zeile
             label="Nebenkosten / Jahr"
-            value={objekt.nebenkostenVorauszahlung ? fmtEUR(objekt.nebenkostenVorauszahlung * 12) : "—"}
+            value={
+              objekt.nebenkostenVorauszahlung ? fmtEUR(objekt.nebenkostenVorauszahlung * 12) : "—"
+            }
           />
           <Zeile label="Miete pro m²" value={k.mieteProQm != null ? fmtEUR(k.mieteProQm) : "—"} />
-          <Zeile label="Cashflow / Monat" value={k.rateMonat > 0 || k.monatskaltmiete > 0 ? fmtEUR(k.cashflowMonat) : "—"} />
+          <Zeile
+            label="Cashflow / Monat"
+            value={k.rateMonat > 0 || k.monatskaltmiete > 0 ? fmtEUR(k.cashflowMonat) : "—"}
+          />
           <Zeile
             label="Eigenkapitalrendite (Cashflow)"
-            value={k.eigenkapitalrenditeCashflow != null ? fmtPct(k.eigenkapitalrenditeCashflow) : "—"}
+            value={
+              k.eigenkapitalrenditeCashflow != null ? fmtPct(k.eigenkapitalrenditeCashflow) : "—"
+            }
           />
           {!objekt.vermietet && k.monatskaltmiete > 0 && (
             <p className="mt-3 rounded-md bg-secondary p-3 text-xs text-muted-foreground">
@@ -319,7 +369,9 @@ function ObjektDetail() {
 
           {mieteZeilenDiesenMonat.length > 0 && (
             <div className="mt-4 space-y-2">
-              <div className="text-xs font-medium text-muted-foreground">Miete {monatLabel(mKey)}</div>
+              <div className="text-xs font-medium text-muted-foreground">
+                Miete {monatLabel(mKey)}
+              </div>
               {mieteZeilenDiesenMonat.map(({ mieter: m, betrag }) => {
                 const bezahlt = istBezahlt(m.id);
                 return (
@@ -343,7 +395,9 @@ function ObjektDetail() {
                         {m.name}: {bezahlt ? "bezahlt" : "noch offen"}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {bezahlt ? "Zum Rückgängigmachen klicken." : "Klicken, um als bezahlt zu markieren."}
+                        {bezahlt
+                          ? "Zum Rückgängigmachen klicken."
+                          : "Klicken, um als bezahlt zu markieren."}
                       </div>
                     </div>
                     <div className="shrink-0 font-medium tabular-nums">{fmtEUR(betrag)}</div>
@@ -387,7 +441,10 @@ function ObjektDetail() {
 
       {/* Restschuld (Kurzüberblick, Details auf eigener Seite) */}
       {t.gueltig && (
-        <Link to="/dashboard/finanzierung" className="block rounded-2xl border bg-card p-5 transition hover:border-foreground/30">
+        <Link
+          to="/dashboard/finanzierung"
+          className="block rounded-2xl border bg-card p-5 transition hover:border-foreground/30"
+        >
           <div className="mb-3 flex items-center justify-between">
             <div className="text-sm font-medium">Restschuld & Tilgung</div>
             <span className="inline-flex items-center gap-1 text-xs text-primary">
@@ -395,8 +452,17 @@ function ObjektDetail() {
             </span>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <KennzahlKarte label="Restschuld heute" value={fmtEUR(t.restschuld)} hint={`von ${fmtEUR(t.darlehen)} Darlehen`} />
-            <KennzahlKarte label="Bereits getilgt" value={fmtEUR(t.bereitsGetilgt)} tone="pos" hint={`${t.monateGelaufen} Monate gezahlt`} />
+            <KennzahlKarte
+              label="Restschuld heute"
+              value={fmtEUR(t.restschuld)}
+              hint={`von ${fmtEUR(t.darlehen)} Darlehen`}
+            />
+            <KennzahlKarte
+              label="Bereits getilgt"
+              value={fmtEUR(t.bereitsGetilgt)}
+              tone="pos"
+              hint={`${t.monateGelaufen} Monate gezahlt`}
+            />
             <KennzahlKarte
               label="Voraussichtlich schuldenfrei"
               value={
@@ -404,10 +470,18 @@ function ObjektDetail() {
                   ? "—"
                   : `${Math.floor(t.restlaufzeitMonate / 12)} J. ${t.restlaufzeitMonate % 12} Mon.`
               }
-              hint={t.abbezahltVoraussichtlich ? `~ ${monatLabel(t.abbezahltVoraussichtlich)}` : undefined}
+              hint={
+                t.abbezahltVoraussichtlich
+                  ? `~ ${monatLabel(t.abbezahltVoraussichtlich)}`
+                  : undefined
+              }
             />
           </div>
-          {t.hinweis && <p className="mt-3 rounded-md bg-amber-500/10 p-3 text-xs text-amber-700">{t.hinweis}</p>}
+          {t.hinweis && (
+            <p className="mt-3 rounded-md bg-amber-500/10 p-3 text-xs text-amber-700">
+              {t.hinweis}
+            </p>
+          )}
         </Link>
       )}
 
@@ -419,7 +493,9 @@ function ObjektDetail() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <div className="text-sm font-medium">Einheiten & Mieter</div>
-            <p className="text-xs text-muted-foreground">Optional – für Objekte mit mehreren Wohneinheiten.</p>
+            <p className="text-xs text-muted-foreground">
+              Optional – für Objekte mit mehreren Wohneinheiten.
+            </p>
           </div>
           <EinheitDialog objektId={objekt.id} />
         </div>
@@ -444,7 +520,11 @@ function ObjektDetail() {
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="font-medium">{e.bezeichnung}</div>
-                        {mieter ? <Badge variant="secondary">belegt</Badge> : <Badge variant="outline">frei</Badge>}
+                        {mieter ? (
+                          <Badge variant="secondary">belegt</Badge>
+                        ) : (
+                          <Badge variant="outline">frei</Badge>
+                        )}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
                         {e.wohnflaeche} m² · {e.zimmer} Zi. {e.stockwerk && `· ${e.stockwerk}`}
@@ -473,19 +553,25 @@ function ObjektDetail() {
                             <div className="font-medium">{mieter.name}</div>
                             {(mieter.telefon || mieter.email || mieter.kontakt) && (
                               <div className="text-xs text-muted-foreground">
-                                {[mieter.telefon, mieter.email, mieter.kontakt].filter(Boolean).join(" · ")}
+                                {[mieter.telefon, mieter.email, mieter.kontakt]
+                                  .filter(Boolean)
+                                  .join(" · ")}
                               </div>
                             )}
                             <div className="mt-1 text-xs text-muted-foreground">
                               Miete seit {fmtDate(mieter.mietbeginn)}
-                              {mieter.mietende ? ` · befristet bis ${fmtDate(mieter.mietende)}` : ""}
+                              {mieter.mietende
+                                ? ` · befristet bis ${fmtDate(mieter.mietende)}`
+                                : ""}
                               {mieter.kaution ? ` · Kaution ${fmtEUR(mieter.kaution)}` : ""}
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="font-medium">{fmtEUR(mieter.kaltmiete)}</div>
-                          <div className="text-xs text-muted-foreground">+ {fmtEUR(mieter.nebenkosten)} NK</div>
+                          <div className="text-xs text-muted-foreground">
+                            + {fmtEUR(mieter.nebenkosten)} NK
+                          </div>
                           <div className="mt-1 flex justify-end gap-1">
                             <MieterPortalDialog mieter={mieter} />
                             <MieterDialog einheitId={e.id} existing={mieter} />
@@ -495,7 +581,8 @@ function ObjektDetail() {
                       {auslaufWarnung && (
                         <div className="mt-3 flex items-center gap-2 rounded-md bg-destructive/10 p-2 text-xs text-destructive">
                           <AlertTriangle className="h-4 w-4" />
-                          Mietvertrag läuft in weniger als 3 Monaten aus ({fmtDate(mieter.mietende)}).
+                          Mietvertrag läuft in weniger als 3 Monaten aus ({fmtDate(mieter.mietende)}
+                          ).
                         </div>
                       )}
                     </div>
@@ -503,10 +590,14 @@ function ObjektDetail() {
 
                   {abgelaufen.length > 0 && (
                     <details className="mt-3 text-xs text-muted-foreground">
-                      <summary className="cursor-pointer">Vorherige Mieter ({abgelaufen.length})</summary>
+                      <summary className="cursor-pointer">
+                        Vorherige Mieter ({abgelaufen.length})
+                      </summary>
                       <ul className="mt-2 space-y-1">
                         {abgelaufen.map((m) => (
-                          <li key={m.id}>{m.name} — bis {fmtDate(m.mietende)}</li>
+                          <li key={m.id}>
+                            {m.name} — bis {fmtDate(m.mietende)}
+                          </li>
                         ))}
                       </ul>
                     </details>

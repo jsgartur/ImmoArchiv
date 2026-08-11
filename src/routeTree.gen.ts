@@ -22,7 +22,6 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardPreiseRouteImport } from './routes/dashboard.preise'
 import { Route as DashboardPortfolioRouteImport } from './routes/dashboard.portfolio'
 import { Route as DashboardMieterportalRouteImport } from './routes/dashboard.mieterportal'
-import { Route as DashboardMieteRouteImport } from './routes/dashboard.miete'
 import { Route as DashboardMietanpassungRouteImport } from './routes/dashboard.mietanpassung'
 import { Route as DashboardMaengelRouteImport } from './routes/dashboard.maengel'
 import { Route as DashboardHandwerkerRouteImport } from './routes/dashboard.handwerker'
@@ -32,9 +31,11 @@ import { Route as DashboardAccountRouteImport } from './routes/dashboard.account
 import { Route as DashboardUebergabeIndexRouteImport } from './routes/dashboard.uebergabe.index'
 import { Route as DashboardObjekteIndexRouteImport } from './routes/dashboard.objekte.index'
 import { Route as DashboardNebenkostenIndexRouteImport } from './routes/dashboard.nebenkosten.index'
+import { Route as DashboardMieteIndexRouteImport } from './routes/dashboard.miete.index'
 import { Route as DashboardUebergabeIdRouteImport } from './routes/dashboard.uebergabe.$id'
 import { Route as DashboardObjekteIdRouteImport } from './routes/dashboard.objekte.$id'
 import { Route as DashboardNebenkostenIdRouteImport } from './routes/dashboard.nebenkosten.$id'
+import { Route as DashboardMieteEingaengeRouteImport } from './routes/dashboard.miete.eingaenge'
 
 const PortalRoute = PortalRouteImport.update({
   id: '/portal',
@@ -101,11 +102,6 @@ const DashboardMieterportalRoute = DashboardMieterportalRouteImport.update({
   path: '/mieterportal',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardMieteRoute = DashboardMieteRouteImport.update({
-  id: '/miete',
-  path: '/miete',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardMietanpassungRoute = DashboardMietanpassungRouteImport.update({
   id: '/mietanpassung',
   path: '/mietanpassung',
@@ -152,6 +148,11 @@ const DashboardNebenkostenIndexRoute =
     path: '/nebenkosten/',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardMieteIndexRoute = DashboardMieteIndexRouteImport.update({
+  id: '/miete/',
+  path: '/miete/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardUebergabeIdRoute = DashboardUebergabeIdRouteImport.update({
   id: '/uebergabe/$id',
   path: '/uebergabe/$id',
@@ -165,6 +166,11 @@ const DashboardObjekteIdRoute = DashboardObjekteIdRouteImport.update({
 const DashboardNebenkostenIdRoute = DashboardNebenkostenIdRouteImport.update({
   id: '/nebenkosten/$id',
   path: '/nebenkosten/$id',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMieteEingaengeRoute = DashboardMieteEingaengeRouteImport.update({
+  id: '/miete/eingaenge',
+  path: '/miete/eingaenge',
   getParentRoute: () => DashboardRoute,
 } as any)
 
@@ -184,14 +190,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/handwerker': typeof DashboardHandwerkerRoute
   '/dashboard/maengel': typeof DashboardMaengelRoute
   '/dashboard/mietanpassung': typeof DashboardMietanpassungRoute
-  '/dashboard/miete': typeof DashboardMieteRoute
   '/dashboard/mieterportal': typeof DashboardMieterportalRoute
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/miete/': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten/': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte/': typeof DashboardObjekteIndexRoute
   '/dashboard/uebergabe/': typeof DashboardUebergabeIndexRoute
@@ -211,14 +218,15 @@ export interface FileRoutesByTo {
   '/dashboard/handwerker': typeof DashboardHandwerkerRoute
   '/dashboard/maengel': typeof DashboardMaengelRoute
   '/dashboard/mietanpassung': typeof DashboardMietanpassungRoute
-  '/dashboard/miete': typeof DashboardMieteRoute
   '/dashboard/mieterportal': typeof DashboardMieterportalRoute
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/miete': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte': typeof DashboardObjekteIndexRoute
   '/dashboard/uebergabe': typeof DashboardUebergabeIndexRoute
@@ -240,14 +248,15 @@ export interface FileRoutesById {
   '/dashboard/handwerker': typeof DashboardHandwerkerRoute
   '/dashboard/maengel': typeof DashboardMaengelRoute
   '/dashboard/mietanpassung': typeof DashboardMietanpassungRoute
-  '/dashboard/miete': typeof DashboardMieteRoute
   '/dashboard/mieterportal': typeof DashboardMieterportalRoute
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/miete/': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten/': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte/': typeof DashboardObjekteIndexRoute
   '/dashboard/uebergabe/': typeof DashboardUebergabeIndexRoute
@@ -270,14 +279,15 @@ export interface FileRouteTypes {
     | '/dashboard/handwerker'
     | '/dashboard/maengel'
     | '/dashboard/mietanpassung'
-    | '/dashboard/miete'
     | '/dashboard/mieterportal'
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard/'
+    | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/miete/'
     | '/dashboard/nebenkosten/'
     | '/dashboard/objekte/'
     | '/dashboard/uebergabe/'
@@ -297,14 +307,15 @@ export interface FileRouteTypes {
     | '/dashboard/handwerker'
     | '/dashboard/maengel'
     | '/dashboard/mietanpassung'
-    | '/dashboard/miete'
     | '/dashboard/mieterportal'
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard'
+    | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/miete'
     | '/dashboard/nebenkosten'
     | '/dashboard/objekte'
     | '/dashboard/uebergabe'
@@ -325,14 +336,15 @@ export interface FileRouteTypes {
     | '/dashboard/handwerker'
     | '/dashboard/maengel'
     | '/dashboard/mietanpassung'
-    | '/dashboard/miete'
     | '/dashboard/mieterportal'
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard/'
+    | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/miete/'
     | '/dashboard/nebenkosten/'
     | '/dashboard/objekte/'
     | '/dashboard/uebergabe/'
@@ -443,13 +455,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMieterportalRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/miete': {
-      id: '/dashboard/miete'
-      path: '/miete'
-      fullPath: '/dashboard/miete'
-      preLoaderRoute: typeof DashboardMieteRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/mietanpassung': {
       id: '/dashboard/mietanpassung'
       path: '/mietanpassung'
@@ -513,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNebenkostenIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/miete/': {
+      id: '/dashboard/miete/'
+      path: '/miete'
+      fullPath: '/dashboard/miete/'
+      preLoaderRoute: typeof DashboardMieteIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/uebergabe/$id': {
       id: '/dashboard/uebergabe/$id'
       path: '/uebergabe/$id'
@@ -534,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNebenkostenIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/miete/eingaenge': {
+      id: '/dashboard/miete/eingaenge'
+      path: '/miete/eingaenge'
+      fullPath: '/dashboard/miete/eingaenge'
+      preLoaderRoute: typeof DashboardMieteEingaengeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -544,14 +563,15 @@ interface DashboardRouteChildren {
   DashboardHandwerkerRoute: typeof DashboardHandwerkerRoute
   DashboardMaengelRoute: typeof DashboardMaengelRoute
   DashboardMietanpassungRoute: typeof DashboardMietanpassungRoute
-  DashboardMieteRoute: typeof DashboardMieteRoute
   DashboardMieterportalRoute: typeof DashboardMieterportalRoute
   DashboardPortfolioRoute: typeof DashboardPortfolioRoute
   DashboardPreiseRoute: typeof DashboardPreiseRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardMieteEingaengeRoute: typeof DashboardMieteEingaengeRoute
   DashboardNebenkostenIdRoute: typeof DashboardNebenkostenIdRoute
   DashboardObjekteIdRoute: typeof DashboardObjekteIdRoute
   DashboardUebergabeIdRoute: typeof DashboardUebergabeIdRoute
+  DashboardMieteIndexRoute: typeof DashboardMieteIndexRoute
   DashboardNebenkostenIndexRoute: typeof DashboardNebenkostenIndexRoute
   DashboardObjekteIndexRoute: typeof DashboardObjekteIndexRoute
   DashboardUebergabeIndexRoute: typeof DashboardUebergabeIndexRoute
@@ -564,14 +584,15 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHandwerkerRoute: DashboardHandwerkerRoute,
   DashboardMaengelRoute: DashboardMaengelRoute,
   DashboardMietanpassungRoute: DashboardMietanpassungRoute,
-  DashboardMieteRoute: DashboardMieteRoute,
   DashboardMieterportalRoute: DashboardMieterportalRoute,
   DashboardPortfolioRoute: DashboardPortfolioRoute,
   DashboardPreiseRoute: DashboardPreiseRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardMieteEingaengeRoute: DashboardMieteEingaengeRoute,
   DashboardNebenkostenIdRoute: DashboardNebenkostenIdRoute,
   DashboardObjekteIdRoute: DashboardObjekteIdRoute,
   DashboardUebergabeIdRoute: DashboardUebergabeIdRoute,
+  DashboardMieteIndexRoute: DashboardMieteIndexRoute,
   DashboardNebenkostenIndexRoute: DashboardNebenkostenIndexRoute,
   DashboardObjekteIndexRoute: DashboardObjekteIndexRoute,
   DashboardUebergabeIndexRoute: DashboardUebergabeIndexRoute,

@@ -13,7 +13,9 @@ export function PageTabs({ tabs }: { tabs: TabItem[] }) {
   return (
     <div className="flex gap-1 border-b">
       {tabs.map((t) => {
-        const active = t.exact ? pathname === t.to : pathname === t.to || pathname.startsWith(t.to + "/");
+        const active = t.exact
+          ? pathname === t.to
+          : pathname === t.to || pathname.startsWith(t.to + "/");
         return (
           <Link
             key={t.to}
@@ -36,6 +38,11 @@ export function PageTabs({ tabs }: { tabs: TabItem[] }) {
 export const PORTFOLIO_TABS: TabItem[] = [
   { to: "/dashboard/portfolio", label: "Portfolio" },
   { to: "/dashboard/finanzierung", label: "Restschuld" },
+];
+
+export const MIETE_TABS: TabItem[] = [
+  { to: "/dashboard/miete", label: "Mietverhältnisse" },
+  { to: "/dashboard/miete/eingaenge", label: "Mieteingänge" },
 ];
 
 export const AUFGABEN_TABS: TabItem[] = [

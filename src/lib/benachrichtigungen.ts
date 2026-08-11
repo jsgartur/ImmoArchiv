@@ -84,7 +84,7 @@ export function useBenachrichtigungen(): BenachrichtigungAnsicht[] {
         text: `Ein neuer Monat hat begonnen — prüfen Sie die Mieteingänge für ${monatLabel(monatKey(heute))}.`,
         datum: new Date(heute.getFullYear(), heute.getMonth(), 1).toISOString(),
         gelesen: gelesenVirtuell.includes(id),
-        link: { to: "/dashboard/miete" },
+        link: { to: "/dashboard/miete/eingaenge" },
         markiereGelesen: () => markiereVirtuelleBenachrichtigungGelesen(id),
       });
     }

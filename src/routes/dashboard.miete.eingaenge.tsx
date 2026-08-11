@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,31 +8,13 @@ import {
   Coins,
   ArrowRight,
   Building2,
-  KeyRound,
 } from "lucide-react";
-import {
-  useStore,
-  fmtEUR,
-  fmtDate,
-  monatKey,
-  monatLabel,
-  type Objekt,
-  type Einheit,
-  type Mieter,
-} from "@/lib/store";
+import { useStore, fmtEUR, monatKey, monatLabel } from "@/lib/store";
 import { erwarteteMieteFuerMonat } from "@/lib/immobilienrechner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PageTabs, MIETE_TABS } from "@/components/page-tabs";
 
-export const Route = createFileRoute("/dashboard/miete")({
+export const Route = createFileRoute("/dashboard/miete/eingaenge")({
   component: Mieteingaenge,
 });
 
@@ -40,126 +22,6 @@ const shiftMonat = (key: string, delta: number) => {
   const [y, m] = key.split("-").map(Number);
   return monatKey(new Date(y, m - 1 + delta, 1));
 };
-
-interface MietverhaeltnisZeile {
-  objekt: Objekt;
-  einheit: Einheit;
-  mieter?: Mieter;
-}
-
-function StatKachel({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string | number;
-  tone?: "accent" | "amber";
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <div
-        className={
-          "text-2xl font-semibold tabular-nums " +
-          (tone === "accent" ? "text-blue-600" : tone === "amber" ? "text-amber-600" : "")
-        }
-      >
-        {value}
-      </div>
-      <div className="mt-1 text-xs text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
-/** Übersicht aller Mietverhältnisse (Einheit × Mieter) über alle Objekte hinweg — verknüpft Objekte/Einheiten mit den Mieteingängen darunter. */
-function Mietverhaeltnisse({
-  objekte,
-  einheiten,
-  mieter,
-}: {
-  objekte: Objekt[];
-  einheiten: Einheit[];
-  mieter: Mieter[];
-}) {
-  const zeilen = useMemo<MietverhaeltnisZeile[]>(() => {
-    const eintraege: MietverhaeltnisZeile[] = [];
-    for (const e of einheiten) {
-      const objekt = objekte.find((o) => o.id === e.objektId);
-      if (!objekt) continue;
-      eintraege.push({
-        objekt,
-        einheit: e,
-        mieter: mieter.find((m) => m.einheitId === e.id && !m.mietende),
-      });
-    }
-    return eintraege.sort(
-      (a, b) =>
-        a.objekt.adresse.localeCompare(b.objekt.adresse) ||
-        a.einheit.bezeichnung.localeCompare(b.einheit.bezeichnung),
-    );
-  }, [objekte, einheiten, mieter]);
-
-  if (zeilen.length === 0) return null;
-
-  const vermietet = zeilen.filter((z) => z.mieter).length;
-
-  return (
-    <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatKachel label="Einheiten gesamt" value={zeilen.length} />
-        <StatKachel label="Vermietet" value={vermietet} tone="accent" />
-        <StatKachel label="Leerstehend" value={zeilen.length - vermietet} tone="amber" />
-      </div>
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead>Objekt</TableHead>
-              <TableHead>Einheit</TableHead>
-              <TableHead>Mieter</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden sm:table-cell">Vertragsart</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {zeilen.map(({ objekt, einheit, mieter: m }) => (
-              <TableRow key={einheit.id}>
-                <TableCell className="p-0">
-                  <Link
-                    to="/dashboard/objekte/$id"
-                    params={{ id: objekt.id }}
-                    className="flex items-center gap-2 px-2 py-2.5 font-medium hover:underline"
-                  >
-                    <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    {objekt.strasse || objekt.adresse.split(",")[0]}
-                  </Link>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{einheit.bezeichnung}</TableCell>
-                <TableCell>
-                  {m?.name ?? <span className="text-muted-foreground">Leerstand</span>}
-                </TableCell>
-                <TableCell>
-                  {m ? (
-                    <Badge variant="outline" className="border-blue-500/40 text-blue-600">
-                      <KeyRound className="h-3 w-3" /> vermietet
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-amber-500/40 text-amber-600">
-                      Leerstand
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="hidden text-muted-foreground sm:table-cell">
-                  {m ? (m.mietende ? `Befristet bis ${fmtDate(m.mietende)}` : "Unbefristet") : "—"}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
 
 function Mieteingaenge() {
   const objekte = useStore((s) => s.objekte);
@@ -220,7 +82,7 @@ function Mieteingaenge() {
         </p>
       </div>
 
-      <Mietverhaeltnisse objekte={objekte} einheiten={einheiten} mieter={mieter} />
+      <PageTabs tabs={MIETE_TABS} />
 
       {/* Monatsnavigation */}
       <div className="flex items-center justify-between rounded-xl border bg-card p-3">
@@ -259,10 +121,10 @@ function Mieteingaenge() {
             Mieter bei einer Einheit an, um Mieteingänge zu verfolgen.
           </p>
           <Link
-            to="/dashboard/objekte"
+            to="/dashboard/miete"
             className="mt-4 inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
-            Zu den Objekten <ArrowRight className="h-4 w-4" />
+            Zu den Mietverhältnissen <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       ) : (

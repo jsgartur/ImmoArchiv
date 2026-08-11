@@ -478,6 +478,14 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const newUuid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : uid();
 
+/** Extrahiert eine lesbare Meldung aus Error-Objekten UND Supabase-Fehlern (PostgrestError ist kein Error, sondern ein {message,...}-Objekt). */
+const fehlerText = (e: unknown): string => {
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === "object" && "message" in e)
+    return String((e as { message: unknown }).message);
+  return String(e);
+};
+
 /** Kurzer, gut lesbarer Zugangscode fürs Mieterportal (ohne verwechselbare Zeichen wie 0/O, 1/I/l). */
 const PORTAL_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const newPortalCode = () =>
@@ -617,8 +625,7 @@ export const useStore = create<State>()(
         set((s) => ({ profil: { ...s.profil, ...patch } }));
         updateProfilRow(patch).catch((e) => {
           console.error("Profil konnte nicht gespeichert werden:", e);
-          const detail = e instanceof Error ? e.message : String(e);
-          toast.error(`Änderung konnte nicht in der Cloud gespeichert werden: ${detail}`);
+          toast.error(`Änderung konnte nicht in der Cloud gespeichert werden: ${fehlerText(e)}`);
         });
       },
 
