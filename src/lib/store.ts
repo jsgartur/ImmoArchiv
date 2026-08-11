@@ -198,6 +198,14 @@ export interface NkPartei {
   einheitId?: string; // Bezug zur Einheit, wenn aus echten Mieterdaten übernommen (für Sortierung nach Etage)
 }
 
+export type BriefpapierId = "klassisch" | "modern" | "elegant";
+
+export const BRIEFPAPIER_LABEL: Record<BriefpapierId, string> = {
+  klassisch: "Klassisch",
+  modern: "Modern",
+  elegant: "Elegant",
+};
+
 export interface Abrechnung {
   id: string;
   objektId: string;
@@ -206,6 +214,7 @@ export interface Abrechnung {
   bis: string; // ISO
   positionen: NkPosition[];
   parteien: NkPartei[];
+  briefpapier?: BriefpapierId; // default "klassisch"
   erstelltAm: string; // ISO
 }
 
@@ -226,6 +235,9 @@ export interface Profil {
   kontotyp: "privat" | "unternehmen";
   plan: PlanId;
   avatarUrl?: string; // Storage-Pfad im Bucket "avatare"
+  kontoinhaber?: string;
+  iban?: string;
+  bic?: string;
   stripeCustomerId?: string;
 }
 

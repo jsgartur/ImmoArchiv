@@ -1,6 +1,19 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Plus, Trash2, Printer, Save, Users, ReceiptText, FileDown, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Printer,
+  Save,
+  Users,
+  ReceiptText,
+  FileDown,
+  RefreshCw,
+  User,
+  Landmark,
+  Check,
+} from "lucide-react";
 import { erzeugeNkPdf } from "@/lib/nk-pdf";
 import {
   useStore,
@@ -8,21 +21,133 @@ import {
   fmtDate,
   UMLAGE_LABEL,
   NK_VORLAGEN,
+  BRIEFPAPIER_LABEL,
   type NkPartei,
   type NkPosition,
   type Umlageschluessel,
+  type BriefpapierId,
+  type Profil,
 } from "@/lib/store";
 import { berechneAbrechnung, gezahlteVorauszahlung } from "@/lib/nebenkosten";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
+import { cn } from "@/lib/utils";
+
+const BRIEFPAPIER_AKZENT: Record<BriefpapierId, string> = {
+  klassisch: "border-blue-600",
+  modern: "border-slate-900 dark:border-slate-100",
+  elegant: "border-amber-600",
+};
+
+const BRIEFPAPIER_SWATCH: Record<BriefpapierId, string> = {
+  klassisch: "bg-blue-600",
+  modern: "bg-slate-900 dark:bg-slate-100",
+  elegant: "bg-amber-600",
+};
+
+const BRIEFPAPIER_FONT: Record<BriefpapierId, string> = {
+  klassisch: "",
+  modern: "",
+  elegant: "font-serif",
+};
+
+function Feldzeile({ label, wert }: { label: string; wert?: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="text-muted-foreground">{label}:</span>
+      {wert ? (
+        <span className="font-medium">{wert}</span>
+      ) : (
+        <Link to="/dashboard/account" className="text-primary hover:underline">
+          Hinzufügen
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function AbsenderKontoKarte({ profil }: { profil: Profil }) {
+  const name = [profil.vorname, profil.nachname].filter(Boolean).join(" ");
+  const ort = [profil.plz, profil.ort].filter(Boolean).join(" ");
+  return (
+    <div className="no-print grid gap-4 rounded-2xl border bg-card p-5 sm:grid-cols-2">
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+          <User className="h-4 w-4" /> Absenderinformationen
+        </div>
+        <div className="space-y-1.5 rounded-xl border bg-background p-3">
+          <Feldzeile label="Firma" wert={profil.firma || undefined} />
+          <Feldzeile label="Name" wert={name || undefined} />
+          <Feldzeile label="Straße" wert={profil.strasse || undefined} />
+          <Feldzeile label="Ort" wert={ort || undefined} />
+        </div>
+      </div>
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+          <Landmark className="h-4 w-4" /> Kontoinformationen
+        </div>
+        <div className="space-y-1.5 rounded-xl border bg-background p-3">
+          <Feldzeile label="Kontoinhaber" wert={profil.kontoinhaber} />
+          <Feldzeile label="IBAN" wert={profil.iban} />
+          <Feldzeile label="BIC" wert={profil.bic} />
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Diese Daten befinden sich im{" "}
+          <Link to="/dashboard/account" className="text-primary hover:underline">
+            Benutzerprofil
+          </Link>
+          .
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function BriefpapierAuswahl({
+  wert,
+  onChange,
+}: {
+  wert: BriefpapierId;
+  onChange: (v: BriefpapierId) => void;
+}) {
+  return (
+    <div className="no-print rounded-2xl border bg-card p-5">
+      <div className="mb-3 text-sm font-medium">Briefpapier</div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {(Object.keys(BRIEFPAPIER_LABEL) as BriefpapierId[]).map((id) => (
+          <button
+            key={id}
+            onClick={() => onChange(id)}
+            className={cn(
+              "flex items-center gap-3 rounded-xl border p-3 text-left transition hover:border-foreground/40",
+              wert === id && "border-foreground ring-1 ring-foreground",
+            )}
+          >
+            <span className={cn("h-8 w-8 shrink-0 rounded-md", BRIEFPAPIER_SWATCH[id])} />
+            <span className="flex-1 text-sm font-medium">{BRIEFPAPIER_LABEL[id]}</span>
+            {wert === id && <Check className="h-4 w-4 shrink-0" />}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/dashboard/nebenkosten/$id")({
   component: AbrechnungEditor,
-  notFoundComponent: () => <div className="py-20 text-center text-muted-foreground">Abrechnung nicht gefunden.</div>,
+  notFoundComponent: () => (
+    <div className="py-20 text-center text-muted-foreground">Abrechnung nicht gefunden.</div>
+  ),
 });
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -44,29 +169,38 @@ function AbrechnungEditor() {
   const [bis, setBis] = useState(gespeichert?.bis ?? "");
   const [parteien, setParteien] = useState<NkPartei[]>(gespeichert?.parteien ?? []);
   const [positionen, setPositionen] = useState<NkPosition[]>(gespeichert?.positionen ?? []);
+  const [briefpapier, setBriefpapier] = useState<BriefpapierId>(
+    gespeichert?.briefpapier ?? "klassisch",
+  );
 
   if (!abrechnungenGeladen) {
     return <LadeSkeleton titel="Abrechnung" text="Details werden geladen…" />;
   }
   if (!gespeichert) throw notFound();
 
-  const aktuell = { ...gespeichert, titel, von, bis, parteien, positionen };
+  const aktuell = { ...gespeichert, titel, von, bis, parteien, positionen, briefpapier };
   const ergebnis = berechneAbrechnung(aktuell);
-  const dirty = JSON.stringify(aktuell) !== JSON.stringify(gespeichert);
+  const dirty =
+    JSON.stringify(aktuell) !==
+    JSON.stringify({ ...gespeichert, briefpapier: gespeichert.briefpapier ?? "klassisch" });
 
   const speichern = () => {
-    updateAbrechnung(id, { titel, von, bis, parteien, positionen });
+    updateAbrechnung(id, { titel, von, bis, parteien, positionen, briefpapier });
     toast.success("Abrechnung gespeichert");
   };
 
   // Parteien
   const addPartei = () =>
-    setParteien((p) => [...p, { id: uid(), name: "Neue Partei", wohnflaeche: 0, personen: 1, nkVorausMonat: 0 }]);
+    setParteien((p) => [
+      ...p,
+      { id: uid(), name: "Neue Partei", wohnflaeche: 0, personen: 1, nkVorausMonat: 0 },
+    ]);
   const setPartei = (pid: string, patch: Partial<NkPartei>) =>
     setParteien((list) => list.map((p) => (p.id === pid ? { ...p, ...patch } : p)));
   const removePartei = (pid: string) => setParteien((list) => list.filter((p) => p.id !== pid));
 
-  const einheitLabel = (einheitId?: string) => (einheitId ? einheiten.find((e) => e.id === einheitId)?.bezeichnung : undefined);
+  const einheitLabel = (einheitId?: string) =>
+    einheitId ? einheiten.find((e) => e.id === einheitId)?.bezeichnung : undefined;
 
   /** Übernimmt Name/Wohnfläche/NK-Vorauszahlung/Einzug/Auszug erneut aus dem aktuellen Mieter-Datensatz
    *  (die Partei ist beim Anlegen der Abrechnung nur eine Momentaufnahme – falls sich der Mieter seither
@@ -105,12 +239,17 @@ function AbrechnungEditor() {
     <div className="space-y-6">
       {/* Kopf */}
       <div className="no-print">
-        <Link to="/dashboard/nebenkosten" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/dashboard/nebenkosten"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Alle Abrechnungen
         </Link>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{titel || "Nebenkostenabrechnung"}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              {titel || "Nebenkostenabrechnung"}
+            </h1>
             <p className="text-sm text-muted-foreground">{objekt?.adresse ?? "Objekt gelöscht"}</p>
           </div>
           <div className="flex gap-2">
@@ -157,22 +296,27 @@ function AbrechnungEditor() {
             <Input type="date" value={bis.slice(0, 10)} onChange={(e) => setBis(e.target.value)} />
           </div>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">{ergebnis.monate} Monate im Abrechnungszeitraum.</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {ergebnis.monate} Monate im Abrechnungszeitraum.
+        </p>
         {objekt?.kaufdatum && objekt.kaufdatum.slice(0, 10) > bis.slice(0, 10) && (
           <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
-            Achtung: Das Objekt wurde erst am {fmtDate(objekt.kaufdatum)} gekauft — also nach diesem Abrechnungszeitraum.
-            Für diesen Zeitraum sind keine Nebenkosten angefallen.
+            Achtung: Das Objekt wurde erst am {fmtDate(objekt.kaufdatum)} gekauft — also nach diesem
+            Abrechnungszeitraum. Für diesen Zeitraum sind keine Nebenkosten angefallen.
           </p>
         )}
         {objekt?.kaufdatum &&
           objekt.kaufdatum.slice(0, 10) > von.slice(0, 10) &&
           objekt.kaufdatum.slice(0, 10) <= bis.slice(0, 10) && (
             <p className="mt-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
-              Hinweis: Kauf am {fmtDate(objekt.kaufdatum)} — Vorauszahlungen werden erst ab dem Kaufdatum anteilig
-              angesetzt.
+              Hinweis: Kauf am {fmtDate(objekt.kaufdatum)} — Vorauszahlungen werden erst ab dem
+              Kaufdatum anteilig angesetzt.
             </p>
           )}
       </div>
+
+      <AbsenderKontoKarte profil={profil} />
+      <BriefpapierAuswahl wert={briefpapier} onChange={setBriefpapier} />
 
       {/* Parteien */}
       <div className="no-print rounded-2xl border bg-card p-5">
@@ -185,9 +329,10 @@ function AbrechnungEditor() {
           </Button>
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          Tragen Sie die <strong>monatliche NK-Vorauszahlung</strong> ein sowie – falls der Mieter nicht den ganzen
-          Zeitraum wohnte – <strong>Einzug/Auszug</strong>. Die gezahlte Vorauszahlung wird daraus anteilig berechnet
-          (Einzug am 15. → halber Monat). Das hat nichts mit der Kaution zu tun.
+          Tragen Sie die <strong>monatliche NK-Vorauszahlung</strong> ein sowie – falls der Mieter
+          nicht den ganzen Zeitraum wohnte – <strong>Einzug/Auszug</strong>. Die gezahlte
+          Vorauszahlung wird daraus anteilig berechnet (Einzug am 15. → halber Monat). Das hat
+          nichts mit der Kaution zu tun.
         </p>
 
         <div className="space-y-3">
@@ -196,41 +341,74 @@ function AbrechnungEditor() {
             const etikett = einheitLabel(p.einheitId);
             return (
               <div key={p.id} className="rounded-xl border bg-background p-3">
-                {etikett && <div className="mb-2 text-[11px] font-medium text-muted-foreground">{etikett}</div>}
+                {etikett && (
+                  <div className="mb-2 text-[11px] font-medium text-muted-foreground">
+                    {etikett}
+                  </div>
+                )}
                 <div className="grid gap-2 sm:grid-cols-[1fr_90px_80px_36px_36px]">
                   <div>
                     <Label className="text-[11px] text-muted-foreground">Name</Label>
-                    <Input value={p.name} onChange={(e) => setPartei(p.id, { name: e.target.value })} placeholder="Name" />
+                    <Input
+                      value={p.name}
+                      onChange={(e) => setPartei(p.id, { name: e.target.value })}
+                      placeholder="Name"
+                    />
                   </div>
                   <div>
                     <Label className="text-[11px] text-muted-foreground">Wohnfl. m²</Label>
-                    <Input type="number" value={p.wohnflaeche || ""} onChange={(e) => setPartei(p.id, { wohnflaeche: +e.target.value })} />
+                    <Input
+                      type="number"
+                      value={p.wohnflaeche || ""}
+                      onChange={(e) => setPartei(p.id, { wohnflaeche: +e.target.value })}
+                    />
                   </div>
                   <div>
                     <Label className="text-[11px] text-muted-foreground">Personen</Label>
-                    <Input type="number" value={p.personen || ""} onChange={(e) => setPartei(p.id, { personen: +e.target.value })} />
+                    <Input
+                      type="number"
+                      value={p.personen || ""}
+                      onChange={(e) => setPartei(p.id, { personen: +e.target.value })}
+                    />
                   </div>
                   <div className="flex items-end">
                     {p.einheitId && (
-                      <Button variant="ghost" size="icon" onClick={() => syncPartei(p.id)} aria-label="Mit aktuellem Mieter abgleichen" title="Mit aktuellem Mieter abgleichen">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => syncPartei(p.id)}
+                        aria-label="Mit aktuellem Mieter abgleichen"
+                        title="Mit aktuellem Mieter abgleichen"
+                      >
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
                   <div className="flex items-end">
-                    <Button variant="ghost" size="icon" onClick={() => removePartei(p.id)} aria-label="Partei entfernen">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePartei(p.id)}
+                      aria-label="Partei entfernen"
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
                   <div>
-                    <Label className="text-[11px] text-muted-foreground">NK-Vorauszahlung / Monat €</Label>
+                    <Label className="text-[11px] text-muted-foreground">
+                      NK-Vorauszahlung / Monat €
+                    </Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={p.nkVorausMonat ?? ""}
-                      onChange={(e) => setPartei(p.id, { nkVorausMonat: e.target.value === "" ? undefined : +e.target.value })}
+                      onChange={(e) =>
+                        setPartei(p.id, {
+                          nkVorausMonat: e.target.value === "" ? undefined : +e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -252,14 +430,17 @@ function AbrechnungEditor() {
                 </div>
                 <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/50 px-3 py-1.5 text-xs">
                   <span className="text-muted-foreground">
-                    Gezahlte Vorauszahlung: {vz.monate.toLocaleString("de-DE")} Mon. × {fmtEUR(vz.monatlich)}
+                    Gezahlte Vorauszahlung: {vz.monate.toLocaleString("de-DE")} Mon. ×{" "}
+                    {fmtEUR(vz.monatlich)}
                   </span>
                   <span className="font-medium tabular-nums">{fmtEUR(vz.gesamt)}</span>
                 </div>
               </div>
             );
           })}
-          {parteien.length === 0 && <p className="text-sm text-muted-foreground">Noch keine Parteien.</p>}
+          {parteien.length === 0 && (
+            <p className="text-sm text-muted-foreground">Noch keine Parteien.</p>
+          )}
         </div>
       </div>
 
@@ -302,9 +483,21 @@ function AbrechnungEditor() {
         <div className="space-y-2">
           {positionen.map((pos) => (
             <div key={pos.id} className="grid gap-2 sm:grid-cols-[1fr_120px_180px_36px]">
-              <Input value={pos.bezeichnung} onChange={(e) => setPosition(pos.id, { bezeichnung: e.target.value })} placeholder="z. B. Grundsteuer" />
-              <Input type="number" step="0.01" value={pos.betrag || ""} onChange={(e) => setPosition(pos.id, { betrag: +e.target.value })} />
-              <Select value={pos.schluessel} onValueChange={(v) => setPosition(pos.id, { schluessel: v as Umlageschluessel })}>
+              <Input
+                value={pos.bezeichnung}
+                onChange={(e) => setPosition(pos.id, { bezeichnung: e.target.value })}
+                placeholder="z. B. Grundsteuer"
+              />
+              <Input
+                type="number"
+                step="0.01"
+                value={pos.betrag || ""}
+                onChange={(e) => setPosition(pos.id, { betrag: +e.target.value })}
+              />
+              <Select
+                value={pos.schluessel}
+                onValueChange={(v) => setPosition(pos.id, { schluessel: v as Umlageschluessel })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -316,14 +509,20 @@ function AbrechnungEditor() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="icon" onClick={() => removePosition(pos.id)} aria-label="Position entfernen">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removePosition(pos.id)}
+                aria-label="Position entfernen"
+              >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           ))}
           {positionen.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Noch keine Positionen. Über „Typische Position hinzufügen" starten Sie mit den üblichen Betriebskosten.
+              Noch keine Positionen. Über „Typische Position hinzufügen" starten Sie mit den
+              üblichen Betriebskosten.
             </p>
           )}
         </div>
@@ -334,7 +533,13 @@ function AbrechnungEditor() {
       </div>
 
       {/* Ergebnis (druckbar) */}
-      <div className="nk-print rounded-2xl border bg-card p-6">
+      <div
+        className={cn(
+          "nk-print rounded-2xl border border-t-4 bg-card p-6",
+          BRIEFPAPIER_AKZENT[briefpapier],
+          BRIEFPAPIER_FONT[briefpapier],
+        )}
+      >
         <div className="mb-6 border-b pb-4">
           <div className="text-xs text-muted-foreground">
             {[profil.vorname, profil.nachname].filter(Boolean).join(" ") || "Vermieter/in"}
@@ -348,67 +553,84 @@ function AbrechnungEditor() {
         </div>
 
         {ergebnis.parteien.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Fügen Sie Parteien und Positionen hinzu, um das Ergebnis zu sehen.</p>
+          <p className="text-sm text-muted-foreground">
+            Fügen Sie Parteien und Positionen hinzu, um das Ergebnis zu sehen.
+          </p>
         ) : (
           <div className="space-y-6">
             {[...ergebnis.parteien]
-              .sort((a, b) => (einheitLabel(a.partei.einheitId) ?? a.partei.name).localeCompare(einheitLabel(b.partei.einheitId) ?? b.partei.name))
+              .sort((a, b) =>
+                (einheitLabel(a.partei.einheitId) ?? a.partei.name).localeCompare(
+                  einheitLabel(b.partei.einheitId) ?? b.partei.name,
+                ),
+              )
               .map((pe) => (
-              <div key={pe.partei.id} className="rounded-xl border p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div className="font-medium">{pe.partei.name}</div>
-                    {einheitLabel(pe.partei.einheitId) && (
-                      <div className="text-xs text-muted-foreground">{einheitLabel(pe.partei.einheitId)}</div>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {pe.partei.wohnflaeche} m² · {pe.partei.personen} Pers.
-                  </div>
-                </div>
-
-                <table className="mt-3 w-full text-sm">
-                  <tbody>
-                    {pe.anteile.map((an) => (
-                      <tr key={an.positionId} className="border-b last:border-none">
-                        <td className="py-1.5 text-muted-foreground">
-                          {an.bezeichnung || "—"}
-                          <span className="ml-1 text-[11px]">({UMLAGE_LABEL[an.schluessel]})</span>
-                        </td>
-                        <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
-                          von {fmtEUR(an.gesamt)}
-                        </td>
-                        <td className="w-28 py-1.5 text-right font-medium tabular-nums">{fmtEUR(an.anteil)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div className="mt-3 space-y-1 border-t pt-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Umlagefähige Kosten (Anteil)</span>
-                    <span className="tabular-nums font-medium">{fmtEUR(pe.gesamtKosten)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Gezahlte NK-Vorauszahlung
-                      {pe.nkVorausMonat > 0 && (
-                        <span className="ml-1 text-xs">
-                          ({pe.monateAnteilig.toLocaleString("de-DE")} Mon. × {fmtEUR(pe.nkVorausMonat)})
-                        </span>
+                <div key={pe.partei.id} className="rounded-xl border p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="font-medium">{pe.partei.name}</div>
+                      {einheitLabel(pe.partei.einheitId) && (
+                        <div className="text-xs text-muted-foreground">
+                          {einheitLabel(pe.partei.einheitId)}
+                        </div>
                       )}
-                    </span>
-                    <span className="tabular-nums">− {fmtEUR(pe.vorauszahlung)}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {pe.partei.wohnflaeche} m² · {pe.partei.personen} Pers.
+                    </div>
                   </div>
-                  <div className="flex justify-between border-t pt-1.5 text-base font-semibold">
-                    <span>{pe.saldo >= 0 ? "Guthaben" : "Nachzahlung"}</span>
-                    <span className={"tabular-nums " + (pe.saldo >= 0 ? "text-blue-600" : "text-destructive")}>
-                      {fmtEUR(Math.abs(pe.saldo))}
-                    </span>
+
+                  <table className="mt-3 w-full text-sm">
+                    <tbody>
+                      {pe.anteile.map((an) => (
+                        <tr key={an.positionId} className="border-b last:border-none">
+                          <td className="py-1.5 text-muted-foreground">
+                            {an.bezeichnung || "—"}
+                            <span className="ml-1 text-[11px]">
+                              ({UMLAGE_LABEL[an.schluessel]})
+                            </span>
+                          </td>
+                          <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
+                            von {fmtEUR(an.gesamt)}
+                          </td>
+                          <td className="w-28 py-1.5 text-right font-medium tabular-nums">
+                            {fmtEUR(an.anteil)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="mt-3 space-y-1 border-t pt-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Umlagefähige Kosten (Anteil)</span>
+                      <span className="tabular-nums font-medium">{fmtEUR(pe.gesamtKosten)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Gezahlte NK-Vorauszahlung
+                        {pe.nkVorausMonat > 0 && (
+                          <span className="ml-1 text-xs">
+                            ({pe.monateAnteilig.toLocaleString("de-DE")} Mon. ×{" "}
+                            {fmtEUR(pe.nkVorausMonat)})
+                          </span>
+                        )}
+                      </span>
+                      <span className="tabular-nums">− {fmtEUR(pe.vorauszahlung)}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-1.5 text-base font-semibold">
+                      <span>{pe.saldo >= 0 ? "Guthaben" : "Nachzahlung"}</span>
+                      <span
+                        className={
+                          "tabular-nums " + (pe.saldo >= 0 ? "text-blue-600" : "text-destructive")
+                        }
+                      >
+                        {fmtEUR(Math.abs(pe.saldo))}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
             <div className="rounded-xl bg-secondary/50 p-4 text-sm">
               <div className="flex justify-between">
@@ -421,16 +643,32 @@ function AbrechnungEditor() {
               </div>
               <div className="mt-1 flex justify-between border-t pt-1.5 font-semibold">
                 <span>Gesamtsaldo</span>
-                <span className={"tabular-nums " + (ergebnis.gesamtSaldo >= 0 ? "text-blue-600" : "text-destructive")}>
+                <span
+                  className={
+                    "tabular-nums " +
+                    (ergebnis.gesamtSaldo >= 0 ? "text-blue-600" : "text-destructive")
+                  }
+                >
                   {ergebnis.gesamtSaldo >= 0 ? "Guthaben " : "Nachzahlung "}
                   {fmtEUR(Math.abs(ergebnis.gesamtSaldo))}
                 </span>
               </div>
             </div>
 
+            {(profil.iban || profil.kontoinhaber) && (
+              <div className="rounded-xl border p-4 text-sm">
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">
+                  Zahlungsangaben
+                </div>
+                {profil.kontoinhaber && <div>Kontoinhaber: {profil.kontoinhaber}</div>}
+                {profil.iban && <div>IBAN: {profil.iban}</div>}
+                {profil.bic && <div>BIC: {profil.bic}</div>}
+              </div>
+            )}
+
             <p className="text-[11px] text-muted-foreground">
-              Hinweis: Nur tatsächlich umlagefähige Betriebskosten (§ 2 BetrKV) dürfen umgelegt werden. Diese
-              Abrechnung ist eine Rechenhilfe und ersetzt keine rechtliche Prüfung.
+              Hinweis: Nur tatsächlich umlagefähige Betriebskosten (§ 2 BetrKV) dürfen umgelegt
+              werden. Diese Abrechnung ist eine Rechenhilfe und ersetzt keine rechtliche Prüfung.
             </p>
           </div>
         )}

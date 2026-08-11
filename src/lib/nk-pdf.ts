@@ -1,23 +1,45 @@
 import { jsPDF } from "jspdf";
-import type { Abrechnung, Objekt, Profil } from "./store";
+import type { Abrechnung, BriefpapierId, Objekt, Profil } from "./store";
 import { fmtDate, UMLAGE_LABEL } from "./store";
 import { berechneAbrechnung } from "./nebenkosten";
 
 const eur = (n: number) =>
-  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) + " EUR";
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) +
+  " EUR";
+
+const BRIEFPAPIER_AKZENT: Record<BriefpapierId, [number, number, number]> = {
+  klassisch: [37, 99, 235], // blue-600
+  modern: [15, 23, 42], // slate-900
+  elegant: [161, 98, 7], // amber-700
+};
+const BRIEFPAPIER_SCHRIFT: Record<BriefpapierId, "helvetica" | "times"> = {
+  klassisch: "helvetica",
+  modern: "helvetica",
+  elegant: "times",
+};
 
 /** Erzeugt eine PDF-Betriebskostenabrechnung und startet den Download. */
 export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined, profil: Profil) {
   const r = berechneAbrechnung(abrechnung);
+  const briefpapier = abrechnung.briefpapier ?? "klassisch";
+  const [ar, ag, ab] = BRIEFPAPIER_AKZENT[briefpapier];
+  const schrift = BRIEFPAPIER_SCHRIFT[briefpapier];
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  doc.setFont(schrift, "normal");
   const M = 18; // Rand
   const W = 210;
   const rechts = W - M;
   let y = 20;
 
+  // Briefpapier-Kopfbalken
+  doc.setFillColor(ar, ag, ab);
+  doc.rect(0, 0, W, 4, "F");
+  y += 4;
+
   const linie = () => {
-    doc.setDrawColor(210);
+    doc.setDrawColor(ar, ag, ab);
     doc.line(M, y, rechts, y);
+    doc.setDrawColor(210);
     y += 6;
   };
   const seitenumbruch = (bedarf = 20) => {
@@ -41,12 +63,12 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
   y += 8;
 
   // Titel
-  doc.setTextColor(20);
+  doc.setTextColor(ar, ag, ab);
   doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
+  doc.setFont(schrift, "bold");
   doc.text(abrechnung.titel || "Nebenkostenabrechnung", M, y);
   y += 7;
-  doc.setFont("helvetica", "normal");
+  doc.setFont(schrift, "normal");
   doc.setFontSize(10);
   doc.setTextColor(90);
   doc.text(`${objekt?.adresse ?? ""}`, M, y);
@@ -59,13 +81,15 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
   // Parteien
   r.parteien.forEach((pe) => {
     seitenumbruch(40);
-    doc.setFont("helvetica", "bold");
+    doc.setFont(schrift, "bold");
     doc.setFontSize(12);
     doc.text(pe.partei.name, M, y);
-    doc.setFont("helvetica", "normal");
+    doc.setFont(schrift, "normal");
     doc.setFontSize(9);
     doc.setTextColor(110);
-    doc.text(`${pe.partei.wohnflaeche} m² · ${pe.partei.personen} Pers.`, rechts, y, { align: "right" });
+    doc.text(`${pe.partei.wohnflaeche} m² · ${pe.partei.personen} Pers.`, rechts, y, {
+      align: "right",
+    });
     doc.setTextColor(20);
     y += 6;
 
@@ -91,12 +115,12 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
     doc.text("Geleistete Vorauszahlung", M + 2, y);
     doc.text("- " + eur(pe.vorauszahlung), rechts, y, { align: "right" });
     y += 6;
-    doc.setFont("helvetica", "bold");
+    doc.setFont(schrift, "bold");
     doc.setFontSize(11);
     const saldoLabel = pe.saldo >= 0 ? "Guthaben (Erstattung)" : "Nachzahlung";
     doc.text(saldoLabel, M + 2, y);
     doc.text(eur(Math.abs(pe.saldo)), rechts, y, { align: "right" });
-    doc.setFont("helvetica", "normal");
+    doc.setFont(schrift, "normal");
     doc.setFontSize(10);
     y += 10;
   });
@@ -111,11 +135,35 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
   doc.text("Summe Vorauszahlungen", M, y);
   doc.text(eur(r.gesamtVorauszahlung), rechts, y, { align: "right" });
   y += 6;
-  doc.setFont("helvetica", "bold");
+  doc.setFont(schrift, "bold");
   doc.text(r.gesamtSaldo >= 0 ? "Gesamtsaldo (Guthaben)" : "Gesamtsaldo (Nachzahlung)", M, y);
   doc.text(eur(Math.abs(r.gesamtSaldo)), rechts, y, { align: "right" });
-  doc.setFont("helvetica", "normal");
+  doc.setFont(schrift, "normal");
   y += 12;
+
+  // Zahlungsangaben
+  if (profil.iban || profil.kontoinhaber) {
+    seitenumbruch(20);
+    doc.setFontSize(9);
+    doc.setTextColor(90);
+    doc.text("Zahlungsangaben", M, y);
+    y += 5;
+    doc.setFontSize(10);
+    doc.setTextColor(20);
+    if (profil.kontoinhaber) {
+      doc.text(`Kontoinhaber: ${profil.kontoinhaber}`, M, y);
+      y += 5;
+    }
+    if (profil.iban) {
+      doc.text(`IBAN: ${profil.iban}`, M, y);
+      y += 5;
+    }
+    if (profil.bic) {
+      doc.text(`BIC: ${profil.bic}`, M, y);
+      y += 5;
+    }
+    y += 6;
+  }
 
   // Fußnote
   doc.setFontSize(8);
@@ -124,6 +172,6 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
     "Nur tatsächlich umlagefähige Betriebskosten (§ 2 BetrKV) dürfen umgelegt werden. Diese Abrechnung ist eine Rechenhilfe und ersetzt keine rechtliche Prüfung.";
   doc.text(doc.splitTextToSize(hinweis, rechts - M), M, y);
 
-  const dateiname = `${(abrechnung.titel || "Nebenkostenabrechnung").replace(/[^\w\-]+/g, "_")}.pdf`;
+  const dateiname = `${(abrechnung.titel || "Nebenkostenabrechnung").replace(/[^\w-]+/g, "_")}.pdf`;
   doc.save(dateiname);
 }

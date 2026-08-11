@@ -16,6 +16,7 @@ function rowToAbrechnung(row: Row): Abrechnung {
     bis: row.bis ?? "",
     positionen: (row.positionen as unknown as NkPosition[]) ?? [],
     parteien: (row.parteien as unknown as NkPartei[]) ?? [],
+    briefpapier: row.briefpapier ?? "klassisch",
     erstelltAm: row.erstellt_am,
   };
 }
@@ -28,12 +29,16 @@ function abrechnungToRow(a: Partial<Abrechnung>): Record<string, unknown> {
   if (a.bis !== undefined) row.bis = a.bis || null;
   if (a.positionen !== undefined) row.positionen = a.positionen;
   if (a.parteien !== undefined) row.parteien = a.parteien;
+  if (a.briefpapier !== undefined) row.briefpapier = a.briefpapier;
   if (a.erstelltAm !== undefined) row.erstellt_am = a.erstelltAm;
   return row;
 }
 
 export async function fetchAbrechnungen(): Promise<Abrechnung[]> {
-  const { data, error } = await supabase.from("abrechnungen").select("*").order("created_at", { ascending: true });
+  const { data, error } = await supabase
+    .from("abrechnungen")
+    .select("*")
+    .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []).map(rowToAbrechnung);
 }

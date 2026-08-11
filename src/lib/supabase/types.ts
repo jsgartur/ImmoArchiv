@@ -37,6 +37,9 @@ export interface Database {
           kontotyp: "privat" | "unternehmen";
           plan: "starter" | "professional";
           avatar_url: string | null;
+          kontoinhaber: string | null;
+          iban: string | null;
+          bic: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           created_at: string;
@@ -208,6 +211,7 @@ export interface Database {
           bis: string | null;
           positionen: Json;
           parteien: Json;
+          briefpapier: "klassisch" | "modern" | "elegant";
           erstellt_am: string;
           created_at: string;
           updated_at: string;

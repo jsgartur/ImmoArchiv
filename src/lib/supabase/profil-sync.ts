@@ -21,6 +21,9 @@ function rowToProfil(row: ProfilRow): Profil {
     kontotyp: row.kontotyp ?? "privat",
     plan: row.plan,
     avatarUrl: row.avatar_url ?? undefined,
+    kontoinhaber: row.kontoinhaber ?? undefined,
+    iban: row.iban ?? undefined,
+    bic: row.bic ?? undefined,
     stripeCustomerId: row.stripe_customer_id ?? undefined,
   };
 }
