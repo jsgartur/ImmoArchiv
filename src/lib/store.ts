@@ -43,6 +43,11 @@ import {
   updateUebergabeprotokollRow,
   deleteUebergabeprotokollRow,
 } from "./supabase/uebergabe-sync";
+import {
+  fetchBenachrichtigungen,
+  markiereBenachrichtigungGelesenRow,
+  markiereAlleBenachrichtigungenGelesenRow,
+} from "./supabase/benachrichtigungen-sync";
 
 export type Prioritaet = "niedrig" | "mittel" | "dringend";
 export type MangelStatus = "gemeldet" | "in_bearbeitung" | "erledigt";
@@ -211,6 +216,7 @@ export interface Profil {
   land: string;
   kontotyp: "privat" | "unternehmen";
   plan: PlanId;
+  avatarUrl?: string; // Storage-Pfad im Bucket "avatare"
   stripeCustomerId?: string;
 }
 
@@ -305,6 +311,18 @@ export interface Mangel {
   verlauf: MangelVerlauf[];
 }
 
+export type BenachrichtigungTyp = "schaden" | "system" | "sonstiges";
+
+export interface Benachrichtigung {
+  id: string;
+  typ: BenachrichtigungTyp;
+  titel: string;
+  text?: string;
+  gelesen: boolean;
+  objektId?: string;
+  erstelltAm: string; // ISO
+}
+
 export interface Handwerker {
   id: string;
   name: string;
@@ -377,6 +395,13 @@ interface State {
   profil: Profil;
   profilGeladen: boolean;
   ladeProfilVonSupabase: () => Promise<void>;
+  benachrichtigungen: Benachrichtigung[];
+  benachrichtigungenGeladen: boolean;
+  ladeBenachrichtigungenVonSupabase: () => Promise<void>;
+  markiereBenachrichtigungGelesen: (id: string) => void;
+  markiereAlleBenachrichtigungenGelesen: () => void;
+  gelesenVirtuelleBenachrichtigungen: string[];
+  markiereVirtuelleBenachrichtigungGelesen: (id: string) => void;
 
   updateProfil: (patch: Partial<Profil>) => void;
 
@@ -570,6 +595,40 @@ export const useStore = create<State>()(
           console.error("Profil konnte nicht gespeichert werden:", e);
           toast.error("Änderung konnte nicht in der Cloud gespeichert werden.");
         });
+      },
+
+      benachrichtigungen: [],
+      benachrichtigungenGeladen: false,
+      ladeBenachrichtigungenVonSupabase: async () => {
+        try {
+          const benachrichtigungen = await fetchBenachrichtigungen();
+          set({ benachrichtigungen, benachrichtigungenGeladen: true });
+        } catch (e) {
+          console.error("Benachrichtigungen konnten nicht geladen werden:", e);
+          set({ benachrichtigungenGeladen: true });
+        }
+      },
+      markiereBenachrichtigungGelesen: (id) => {
+        set((s) => ({
+          benachrichtigungen: s.benachrichtigungen.map((b) => (b.id === id ? { ...b, gelesen: true } : b)),
+        }));
+        markiereBenachrichtigungGelesenRow(id).catch((e) =>
+          console.error("Benachrichtigung konnte nicht als gelesen markiert werden:", e),
+        );
+      },
+      markiereAlleBenachrichtigungenGelesen: () => {
+        set((s) => ({ benachrichtigungen: s.benachrichtigungen.map((b) => ({ ...b, gelesen: true })) }));
+        markiereAlleBenachrichtigungenGelesenRow().catch((e) =>
+          console.error("Benachrichtigungen konnten nicht als gelesen markiert werden:", e),
+        );
+      },
+      gelesenVirtuelleBenachrichtigungen: [],
+      markiereVirtuelleBenachrichtigungGelesen: (id) => {
+        set((s) =>
+          s.gelesenVirtuelleBenachrichtigungen.includes(id)
+            ? s
+            : { gelesenVirtuelleBenachrichtigungen: [...s.gelesenVirtuelleBenachrichtigungen, id] },
+        );
       },
 
       addAufgabe: (a) => {
@@ -1044,6 +1103,8 @@ export const useStore = create<State>()(
           handwerkerGeladen: _hwg,
           uebergabeprotokolle: _uebergabeprotokolle,
           uebergabeprotokolleGeladen: _upg,
+          benachrichtigungen: _benachrichtigungen,
+          benachrichtigungenGeladen: _bg,
           ...rest
         } = s;
         return rest;

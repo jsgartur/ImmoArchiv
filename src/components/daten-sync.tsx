@@ -19,6 +19,7 @@ export function DatenSync() {
   const ladeAufgabenVonSupabase = useStore((s) => s.ladeAufgabenVonSupabase);
   const ladeHandwerkerVonSupabase = useStore((s) => s.ladeHandwerkerVonSupabase);
   const ladeUebergabeprotokolleVonSupabase = useStore((s) => s.ladeUebergabeprotokolleVonSupabase);
+  const ladeBenachrichtigungenVonSupabase = useStore((s) => s.ladeBenachrichtigungenVonSupabase);
 
   useEffect(() => {
     if (loading) return;
@@ -36,6 +37,7 @@ export function DatenSync() {
         ladeAufgabenVonSupabase();
         ladeHandwerkerVonSupabase();
         ladeUebergabeprotokolleVonSupabase();
+        ladeBenachrichtigungenVonSupabase();
       });
     } else {
       useStore.setState({
@@ -59,6 +61,8 @@ export function DatenSync() {
         handwerkerGeladen: false,
         uebergabeprotokolle: [],
         uebergabeprotokolleGeladen: false,
+        benachrichtigungen: [],
+        benachrichtigungenGeladen: false,
       });
     }
   }, [
@@ -74,6 +78,7 @@ export function DatenSync() {
     ladeAufgabenVonSupabase,
     ladeHandwerkerVonSupabase,
     ladeUebergabeprotokolleVonSupabase,
+    ladeBenachrichtigungenVonSupabase,
   ]);
 
   return null;

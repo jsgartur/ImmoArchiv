@@ -20,6 +20,7 @@ function rowToProfil(row: ProfilRow): Profil {
     land: row.land ?? "Deutschland",
     kontotyp: row.kontotyp ?? "privat",
     plan: row.plan,
+    avatarUrl: row.avatar_url ?? undefined,
     stripeCustomerId: row.stripe_customer_id ?? undefined,
   };
 }
@@ -37,8 +38,9 @@ export async function updateProfilRow(patch: Partial<Profil>) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Nicht angemeldet");
-  const { stripeCustomerId: _stripeCustomerId, ...rest } = patch;
-  const row: ProfilUpdate = rest;
+  const { stripeCustomerId: _stripeCustomerId, avatarUrl, ...rest } = patch;
+  const row: ProfilUpdate = { ...rest };
+  if (avatarUrl !== undefined) row.avatar_url = avatarUrl;
   if (Object.keys(row).length === 0) return;
   const { error } = await supabase.from("profiles").update(row).eq("id", user.id);
   if (error) throw error;

@@ -36,6 +36,7 @@ export interface Database {
           land: string | null;
           kontotyp: "privat" | "unternehmen";
           plan: "starter" | "professional";
+          avatar_url: string | null;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           created_at: string;
@@ -164,6 +165,22 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["maengel"]["Row"]> & { einheit_id: string; titel: string };
         Update: Partial<Database["public"]["Tables"]["maengel"]["Row"]>;
+        Relationships: [];
+      };
+      benachrichtigungen: {
+        Row: {
+          id: string;
+          user_id: string;
+          typ: "schaden" | "system" | "sonstiges";
+          titel: string;
+          text: string | null;
+          gelesen: boolean;
+          objekt_id: string | null;
+          mangel_id: string | null;
+          erstellt_am: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["benachrichtigungen"]["Row"]> & { user_id: string; titel: string };
+        Update: Partial<Database["public"]["Tables"]["benachrichtigungen"]["Row"]>;
         Relationships: [];
       };
       mietzahlungen: {

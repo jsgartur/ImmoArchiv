@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { User, ArrowRight, ShieldCheck, Trash2, Loader2, CreditCard, UserPlus, Mail, Clock, CheckCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { User, ArrowRight, ShieldCheck, Trash2, Loader2, CreditCard, UserPlus, Mail, Clock, CheckCircle2, Camera } from "lucide-react";
 import { useStore, type Profil } from "@/lib/store";
 import { planById, monatspreis, istPro } from "@/lib/plaene";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { supabase } from "@/lib/supabase/client";
 import { fetchTeamMitglieder, ladeMitgliedEin, entferneMitglied, type TeamMitglied } from "@/lib/supabase/team";
+import { ladeAvatarHoch } from "@/lib/avatar-utils";
+import { AvatarBild } from "@/components/avatar-bild";
 import { ProGate } from "@/components/pro-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,6 +143,8 @@ function Account() {
   const navigate = useNavigate();
   const [loeschenBusy, setLoeschenBusy] = useState(false);
   const [portalBusy, setPortalBusy] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<Profil>(profil);
   // Profil wird asynchron aus Supabase geladen – Formular übernimmt es, sobald es eintrifft.
   useEffect(() => {
@@ -155,6 +159,21 @@ function Account() {
   const speichern = () => {
     updateProfil(form);
     toast.success("Kontodaten gespeichert");
+  };
+
+  const avatarAendern = async (file: File | undefined) => {
+    if (!file) return;
+    setAvatarBusy(true);
+    try {
+      const pfad = await ladeAvatarHoch(file);
+      updateProfil({ avatarUrl: pfad });
+      toast.success("Profilbild aktualisiert");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Profilbild konnte nicht hochgeladen werden.");
+    } finally {
+      setAvatarBusy(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
   };
 
   const zahlungsmethodeVerwalten = async () => {
@@ -207,9 +226,31 @@ function Account() {
       {/* Kopf: Avatar + Plan */}
       <div className="flex flex-col gap-4 rounded-2xl border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="grid h-14 w-14 place-items-center rounded-full bg-secondary text-lg font-semibold">
-            {initialen === "?" ? <User className="h-6 w-6" /> : initialen}
-          </div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarBusy}
+            className="group relative h-14 w-14 shrink-0 rounded-full outline-none"
+            aria-label="Profilbild ändern"
+          >
+            {profil.avatarUrl ? (
+              <AvatarBild pfad={profil.avatarUrl} alt={form.vorname || "Profilbild"} className="h-14 w-14 rounded-full" />
+            ) : (
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-secondary text-lg font-semibold">
+                {initialen === "?" ? <User className="h-6 w-6" /> : initialen}
+              </div>
+            )}
+            <span className="absolute inset-0 grid place-items-center rounded-full bg-black/50 opacity-0 transition group-hover:opacity-100">
+              {avatarBusy ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
+            </span>
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => avatarAendern(e.target.files?.[0])}
+          />
           <div>
             <div className="font-medium">
               {[form.vorname, form.nachname].filter(Boolean).join(" ") || "Ihr Name"}
