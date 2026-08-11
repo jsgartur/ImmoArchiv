@@ -149,6 +149,18 @@ export const Route = createFileRoute("/dashboard/nebenkosten/$id")({
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+/** Alle Betriebskostenarten nach § 2 BetrKV als vorausgefüllte Zeilen (0 €), statt einzeln hinzufügen zu müssen. */
+const standardPositionen = (): NkPosition[] => {
+  const heute = new Date().toISOString().slice(0, 10);
+  return NK_VORLAGEN.map((v) => ({
+    id: uid(),
+    bezeichnung: v.bezeichnung,
+    betrag: 0,
+    schluessel: v.schluessel,
+    datum: heute,
+  }));
+};
+
 type Schritt = "anlage" | "empfaenger" | "briefpapier" | "kosten" | "abschluss";
 
 const SCHRITTE: { id: Schritt; label: string }[] = [
@@ -216,7 +228,9 @@ function AbrechnungEditor() {
   const [von, setVon] = useState(gespeichert?.von ?? "");
   const [bis, setBis] = useState(gespeichert?.bis ?? "");
   const [parteien, setParteien] = useState<NkPartei[]>(gespeichert?.parteien ?? []);
-  const [positionen, setPositionen] = useState<NkPosition[]>(gespeichert?.positionen ?? []);
+  const [positionen, setPositionen] = useState<NkPosition[]>(
+    gespeichert?.positionen?.length ? gespeichert.positionen : standardPositionen(),
+  );
   const [briefpapier, setBriefpapier] = useState<BriefpapierId>(
     gespeichert?.briefpapier ?? "klassisch",
   );
@@ -748,13 +762,15 @@ function AbrechnungEditor() {
             BRIEFPAPIER_FONT[briefpapier],
           )}
         >
-          <div className="mb-6 border-b pb-4">
+          <div className="mb-6 border-b pb-4 text-center">
             <div className="text-xs text-muted-foreground">
               {[profil.vorname, profil.nachname].filter(Boolean).join(" ") || "Vermieter/in"}
               {profil.strasse ? ` · ${profil.strasse}` : ""}
               {profil.plz || profil.ort ? ` · ${profil.plz} ${profil.ort}` : ""}
             </div>
-            <h2 className="mt-2 text-xl font-semibold">{titel || "Nebenkostenabrechnung"}</h2>
+            <h2 className="mt-2 text-xl font-semibold uppercase tracking-wide">
+              {titel || "Nebenkostenabrechnung"}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {objekt?.adresse} · Zeitraum {fmtDate(von)} – {fmtDate(bis)}
             </p>
@@ -774,7 +790,7 @@ function AbrechnungEditor() {
                 )
                 .map((pe) => (
                   <div key={pe.partei.id} className="rounded-xl border p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-center sm:text-left">
                       <div>
                         <div className="font-medium">{pe.partei.name}</div>
                         {einheitLabel(pe.partei.einheitId) && (
@@ -789,6 +805,14 @@ function AbrechnungEditor() {
                     </div>
 
                     <table className="mt-3 w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
+                          <th className="py-1.5 text-left font-medium">Kostenart</th>
+                          <th className="py-1.5 text-right font-medium">Gesamtkosten</th>
+                          <th className="py-1.5 text-right font-medium">Ihr Anteil</th>
+                          <th className="w-24 py-1.5 text-right font-medium">Betrag</th>
+                        </tr>
+                      </thead>
                       <tbody>
                         {pe.anteile.map((an) => (
                           <tr key={an.positionId} className="border-b last:border-none">
@@ -799,9 +823,14 @@ function AbrechnungEditor() {
                               </span>
                             </td>
                             <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
-                              von {fmtEUR(an.gesamt)}
+                              {fmtEUR(an.gesamt)}
                             </td>
-                            <td className="w-28 py-1.5 text-right font-medium tabular-nums">
+                            <td className="py-1.5 text-right text-xs text-muted-foreground tabular-nums">
+                              {an.gesamt > 0
+                                ? `${((an.anteil / an.gesamt) * 100).toFixed(1)} %`
+                                : "—"}
+                            </td>
+                            <td className="w-24 py-1.5 text-right font-medium tabular-nums">
                               {fmtEUR(an.anteil)}
                             </td>
                           </tr>

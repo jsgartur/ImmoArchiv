@@ -134,7 +134,7 @@ function DashboardLayout() {
           to={n.to}
           onClick={onNavigate}
           className={cn(
-            "inline-flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground",
+            "inline-flex items-center gap-3 rounded-lg px-3 py-2.5 text-base text-muted-foreground transition hover:bg-accent hover:text-foreground",
             isActive(n.to, n.exact) && "bg-accent font-medium text-foreground",
           )}
         >

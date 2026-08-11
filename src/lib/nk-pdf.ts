@@ -49,6 +49,8 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
     }
   };
 
+  const mitte = W / 2;
+
   // Absender
   doc.setFontSize(9);
   doc.setTextColor(110);
@@ -59,21 +61,28 @@ export function erzeugeNkPdf(abrechnung: Abrechnung, objekt: Objekt | undefined,
   ]
     .filter(Boolean)
     .join(" · ");
-  if (absender) doc.text(absender, M, y);
+  if (absender) doc.text(absender, mitte, y, { align: "center" });
   y += 8;
 
   // Titel
   doc.setTextColor(ar, ag, ab);
   doc.setFontSize(18);
   doc.setFont(schrift, "bold");
-  doc.text(abrechnung.titel || "Nebenkostenabrechnung", M, y);
+  doc.text((abrechnung.titel || "Nebenkostenabrechnung").toUpperCase(), mitte, y, {
+    align: "center",
+  });
   y += 7;
   doc.setFont(schrift, "normal");
   doc.setFontSize(10);
   doc.setTextColor(90);
-  doc.text(`${objekt?.adresse ?? ""}`, M, y);
+  doc.text(`${objekt?.adresse ?? ""}`, mitte, y, { align: "center" });
   y += 5;
-  doc.text(`Abrechnungszeitraum: ${fmtDate(abrechnung.von)} – ${fmtDate(abrechnung.bis)}`, M, y);
+  doc.text(
+    `Abrechnungszeitraum: ${fmtDate(abrechnung.von)} – ${fmtDate(abrechnung.bis)}`,
+    mitte,
+    y,
+    { align: "center" },
+  );
   y += 8;
   doc.setTextColor(20);
   linie();
