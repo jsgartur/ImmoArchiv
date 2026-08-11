@@ -162,6 +162,8 @@ function DashboardLayout() {
         <div className="flex flex-wrap gap-x-3 gap-y-1 border-t px-3 pt-3 text-[11px] text-muted-foreground">
           <Link to="/impressum" onClick={onNavigate} className="hover:text-foreground">Impressum</Link>
           <Link to="/datenschutz" onClick={onNavigate} className="hover:text-foreground">Datenschutz</Link>
+          <Link to="/avv" onClick={onNavigate} className="hover:text-foreground">AVV</Link>
+          <Link to="/agb" onClick={onNavigate} className="hover:text-foreground">AGB</Link>
         </div>
       </div>
     </div>
