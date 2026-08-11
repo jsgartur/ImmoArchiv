@@ -41,6 +41,8 @@ export async function updateProfilRow(patch: Partial<Profil>) {
   const { stripeCustomerId: _stripeCustomerId, avatarUrl, ...rest } = patch;
   const row: ProfilUpdate = { ...rest };
   if (avatarUrl !== undefined) row.avatar_url = avatarUrl;
+  // "date"-Spalte lehnt leere Strings ab – wie bei den übrigen Datumsfeldern im Projekt üblich.
+  if (row.geburtsdatum !== undefined) row.geburtsdatum = row.geburtsdatum || null;
   if (Object.keys(row).length === 0) return;
   const { error } = await supabase.from("profiles").update(row).eq("id", user.id);
   if (error) throw error;

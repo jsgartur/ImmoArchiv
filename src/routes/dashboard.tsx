@@ -55,7 +55,8 @@ function ProfilMenu() {
   const profil = useStore((s) => s.profil);
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const initialen = `${profil.vorname?.[0] ?? ""}${profil.nachname?.[0] ?? ""}`.toUpperCase() || "?";
+  const initialen =
+    `${profil.vorname?.[0] ?? ""}${profil.nachname?.[0] ?? ""}`.toUpperCase() || "?";
   const vorname = profil.vorname || "Konto";
   const name = [profil.vorname, profil.nachname].filter(Boolean).join(" ") || "Konto";
 
@@ -63,7 +64,11 @@ function ProfilMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border bg-card py-1 pl-1 pr-2.5 text-sm outline-none transition hover:border-foreground/30">
         {profil.avatarUrl ? (
-          <AvatarBild pfad={profil.avatarUrl} alt={name} className="h-7 w-7 shrink-0 rounded-full" />
+          <AvatarBild
+            pfad={profil.avatarUrl}
+            alt={name}
+            className="h-7 w-7 shrink-0 rounded-full"
+          />
         ) : (
           <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold">
             {initialen === "?" ? <UserCircle className="h-4 w-4" /> : initialen}
@@ -122,14 +127,14 @@ function DashboardLayout() {
   }
 
   const NavList = ({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) => (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-2.5">
       {items.map((n) => (
         <Link
           key={n.to}
           to={n.to}
           onClick={onNavigate}
           className={cn(
-            "inline-flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground",
+            "inline-flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground",
             isActive(n.to, n.exact) && "bg-accent font-medium text-foreground",
           )}
         >
@@ -160,10 +165,18 @@ function DashboardLayout() {
           <ThemeToggle className="w-full justify-start" showLabel />
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1 border-t px-3 pt-3 text-[11px] text-muted-foreground">
-          <Link to="/impressum" onClick={onNavigate} className="hover:text-foreground">Impressum</Link>
-          <Link to="/datenschutz" onClick={onNavigate} className="hover:text-foreground">Datenschutz</Link>
-          <Link to="/avv" onClick={onNavigate} className="hover:text-foreground">AVV</Link>
-          <Link to="/agb" onClick={onNavigate} className="hover:text-foreground">AGB</Link>
+          <Link to="/impressum" onClick={onNavigate} className="hover:text-foreground">
+            Impressum
+          </Link>
+          <Link to="/datenschutz" onClick={onNavigate} className="hover:text-foreground">
+            Datenschutz
+          </Link>
+          <Link to="/avv" onClick={onNavigate} className="hover:text-foreground">
+            AVV
+          </Link>
+          <Link to="/agb" onClick={onNavigate} className="hover:text-foreground">
+            AGB
+          </Link>
         </div>
       </div>
     </div>

@@ -15,9 +15,23 @@ import {
   updateEinheitRow,
   deleteEinheitRow,
 } from "./supabase/einheiten-sync";
-import { fetchMieter, insertMieter, updateMieterRow, deleteMieterRow } from "./supabase/mieter-sync";
-import { fetchMaengel, insertMangel, updateMangelRow, deleteMangelRow } from "./supabase/maengel-sync";
-import { fetchMietzahlungen, upsertMietzahlung, deleteMietzahlung } from "./supabase/mietzahlungen-sync";
+import {
+  fetchMieter,
+  insertMieter,
+  updateMieterRow,
+  deleteMieterRow,
+} from "./supabase/mieter-sync";
+import {
+  fetchMaengel,
+  insertMangel,
+  updateMangelRow,
+  deleteMangelRow,
+} from "./supabase/maengel-sync";
+import {
+  fetchMietzahlungen,
+  upsertMietzahlung,
+  deleteMietzahlung,
+} from "./supabase/mietzahlungen-sync";
 import {
   fetchAbrechnungen,
   insertAbrechnung,
@@ -53,12 +67,7 @@ export type Prioritaet = "niedrig" | "mittel" | "dringend";
 export type MangelStatus = "gemeldet" | "in_bearbeitung" | "erledigt";
 
 export type Objekttyp =
-  | "mehrfamilienhaus"
-  | "eigentumswohnung"
-  | "einfamilienhaus"
-  | "gewerbe"
-  | "garage"
-  | "sonstiges";
+  "mehrfamilienhaus" | "eigentumswohnung" | "einfamilienhaus" | "gewerbe" | "garage" | "sonstiges";
 
 export const OBJEKTTYP_LABEL: Record<Objekttyp, string> = {
   mehrfamilienhaus: "Mehrfamilienhaus",
@@ -405,7 +414,9 @@ interface State {
 
   updateProfil: (patch: Partial<Profil>) => void;
 
-  addAufgabe: (a: Omit<Aufgabe, "id" | "erstelltAm" | "erledigt"> & { erledigt?: boolean }) => string;
+  addAufgabe: (
+    a: Omit<Aufgabe, "id" | "erstelltAm" | "erledigt"> & { erledigt?: boolean },
+  ) => string;
   updateAufgabe: (id: string, patch: Partial<Aufgabe>) => void;
   toggleAufgabe: (id: string) => void;
   removeAufgabe: (id: string) => void;
@@ -458,9 +469,10 @@ const newUuid = () =>
 /** Kurzer, gut lesbarer Zugangscode fürs Mieterportal (ohne verwechselbare Zeichen wie 0/O, 1/I/l). */
 const PORTAL_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const newPortalCode = () =>
-  Array.from({ length: 10 }, () => PORTAL_CODE_ALPHABET[Math.floor(Math.random() * PORTAL_CODE_ALPHABET.length)]).join(
-    "",
-  );
+  Array.from(
+    { length: 10 },
+    () => PORTAL_CODE_ALPHABET[Math.floor(Math.random() * PORTAL_CODE_ALPHABET.length)],
+  ).join("");
 
 export const useStore = create<State>()(
   persist(
@@ -593,7 +605,8 @@ export const useStore = create<State>()(
         set((s) => ({ profil: { ...s.profil, ...patch } }));
         updateProfilRow(patch).catch((e) => {
           console.error("Profil konnte nicht gespeichert werden:", e);
-          toast.error("Änderung konnte nicht in der Cloud gespeichert werden.");
+          const detail = e instanceof Error ? e.message : String(e);
+          toast.error(`Änderung konnte nicht in der Cloud gespeichert werden: ${detail}`);
         });
       },
 
@@ -610,14 +623,18 @@ export const useStore = create<State>()(
       },
       markiereBenachrichtigungGelesen: (id) => {
         set((s) => ({
-          benachrichtigungen: s.benachrichtigungen.map((b) => (b.id === id ? { ...b, gelesen: true } : b)),
+          benachrichtigungen: s.benachrichtigungen.map((b) =>
+            b.id === id ? { ...b, gelesen: true } : b,
+          ),
         }));
         markiereBenachrichtigungGelesenRow(id).catch((e) =>
           console.error("Benachrichtigung konnte nicht als gelesen markiert werden:", e),
         );
       },
       markiereAlleBenachrichtigungenGelesen: () => {
-        set((s) => ({ benachrichtigungen: s.benachrichtigungen.map((b) => ({ ...b, gelesen: true })) }));
+        set((s) => ({
+          benachrichtigungen: s.benachrichtigungen.map((b) => ({ ...b, gelesen: true })),
+        }));
         markiereAlleBenachrichtigungenGelesenRow().catch((e) =>
           console.error("Benachrichtigungen konnten nicht als gelesen markiert werden:", e),
         );
@@ -677,7 +694,9 @@ export const useStore = create<State>()(
         return id;
       },
       updateHandwerker: (id, patch) => {
-        set((s) => ({ handwerker: s.handwerker.map((h) => (h.id === id ? { ...h, ...patch } : h)) }));
+        set((s) => ({
+          handwerker: s.handwerker.map((h) => (h.id === id ? { ...h, ...patch } : h)),
+        }));
         updateHandwerkerRow(id, patch).catch((e) => {
           console.error("Handwerker konnte nicht aktualisiert werden:", e);
           toast.error("Änderung konnte nicht gespeichert werden.");
@@ -703,7 +722,9 @@ export const useStore = create<State>()(
       },
       updateUebergabeprotokoll: (id, patch) => {
         set((s) => ({
-          uebergabeprotokolle: s.uebergabeprotokolle.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+          uebergabeprotokolle: s.uebergabeprotokolle.map((p) =>
+            p.id === id ? { ...p, ...patch } : p,
+          ),
         }));
         updateUebergabeprotokollRow(id, patch).catch((e) => {
           console.error("Übergabeprotokoll konnte nicht aktualisiert werden:", e);
@@ -828,7 +849,9 @@ export const useStore = create<State>()(
       },
 
       setMieteBezahlt: (mieterId, monat, bezahlt, betrag) => {
-        const rest = get().mietzahlungen.filter((z) => !(z.mieterId === mieterId && z.monat === monat));
+        const rest = get().mietzahlungen.filter(
+          (z) => !(z.mieterId === mieterId && z.monat === monat),
+        );
         const bezahltAm = new Date().toISOString();
         set({
           mietzahlungen: bezahlt ? [...rest, { mieterId, monat, betrag, bezahltAm }] : rest,
@@ -848,7 +871,9 @@ export const useStore = create<State>()(
       removeObjekt: (id) => {
         set((s) => {
           const einheitenIds = s.einheiten.filter((e) => e.objektId === id).map((e) => e.id);
-          const mieterIds = s.mieter.filter((m) => einheitenIds.includes(m.einheitId)).map((m) => m.id);
+          const mieterIds = s.mieter
+            .filter((m) => einheitenIds.includes(m.einheitId))
+            .map((m) => m.id);
           return {
             objekte: s.objekte.filter((o) => o.id !== id),
             einheiten: s.einheiten.filter((e) => e.objektId !== id),
@@ -951,7 +976,12 @@ export const useStore = create<State>()(
         });
       },
       setMangelStatus: (id, status) => {
-        const label = status === "gemeldet" ? "Gemeldet" : status === "in_bearbeitung" ? "In Bearbeitung genommen" : "Als erledigt markiert";
+        const label =
+          status === "gemeldet"
+            ? "Gemeldet"
+            : status === "in_bearbeitung"
+              ? "In Bearbeitung genommen"
+              : "Als erledigt markiert";
         let neuerVerlauf: MangelVerlauf[] = [];
         set((s) => ({
           maengel: s.maengel.map((m) => {
@@ -988,7 +1018,15 @@ export const useStore = create<State>()(
       },
 
       reset: () => {
-        set({ objekte: [], einheiten: [], mieter: [], maengel: [], mietzahlungen: [], abrechnungen: [], aufgaben: [] });
+        set({
+          objekte: [],
+          einheiten: [],
+          mieter: [],
+          maengel: [],
+          mietzahlungen: [],
+          abrechnungen: [],
+          aufgaben: [],
+        });
         // Einheiten/Mieter/Mängel/Mietzahlungen/Abrechnungen hängen an Objekte und werden
         // serverseitig per ON DELETE CASCADE mitgelöscht. Aufgaben ohne Objektbezug nicht – separat löschen.
         deleteAllObjekte().catch((e) => {
@@ -1032,9 +1070,27 @@ export const useStore = create<State>()(
           vermietet: true,
           istKaltmiete: 1210,
         });
-        const e1 = get().addEinheit({ objektId: oId, bezeichnung: "EG links", wohnflaeche: 68, zimmer: 3, stockwerk: "EG" });
-        const e2 = get().addEinheit({ objektId: oId, bezeichnung: "1. OG", wohnflaeche: 82, zimmer: 3, stockwerk: "1. OG" });
-        get().addEinheit({ objektId: oId, bezeichnung: "DG", wohnflaeche: 60, zimmer: 2, stockwerk: "DG" });
+        const e1 = get().addEinheit({
+          objektId: oId,
+          bezeichnung: "EG links",
+          wohnflaeche: 68,
+          zimmer: 3,
+          stockwerk: "EG",
+        });
+        const e2 = get().addEinheit({
+          objektId: oId,
+          bezeichnung: "1. OG",
+          wohnflaeche: 82,
+          zimmer: 3,
+          stockwerk: "1. OG",
+        });
+        get().addEinheit({
+          objektId: oId,
+          bezeichnung: "DG",
+          wohnflaeche: 60,
+          zimmer: 2,
+          stockwerk: "DG",
+        });
         get().addMieter({
           einheitId: e1,
           name: "Familie Schmidt",
@@ -1072,10 +1128,26 @@ export const useStore = create<State>()(
           fotos: [],
           gemeldetVon: "mieter",
         });
-        const inTagen = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
-        get().addAufgabe({ titel: "Rauchmelder prüfen", kategorie: "wartung", objektId: oId, faelligkeit: inTagen(20) });
-        get().addAufgabe({ titel: "Wartung Heizung", kategorie: "wartung", objektId: oId, faelligkeit: inTagen(-5) });
-        get().addAufgabe({ titel: "Nebenkostenabrechnung erstellen", kategorie: "frist", objektId: oId, faelligkeit: inTagen(60) });
+        const inTagen = (d: number) =>
+          new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+        get().addAufgabe({
+          titel: "Rauchmelder prüfen",
+          kategorie: "wartung",
+          objektId: oId,
+          faelligkeit: inTagen(20),
+        });
+        get().addAufgabe({
+          titel: "Wartung Heizung",
+          kategorie: "wartung",
+          objektId: oId,
+          faelligkeit: inTagen(-5),
+        });
+        get().addAufgabe({
+          titel: "Nebenkostenabrechnung erstellen",
+          kategorie: "frist",
+          objektId: oId,
+          faelligkeit: inTagen(60),
+        });
       },
     }),
     {
@@ -1114,9 +1186,14 @@ export const useStore = create<State>()(
 );
 
 // Hilfsselektoren
-export const fmtEUR = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n);
+export const fmtEUR = (n: number) =>
+  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n);
 export const fmtEUR0 = (n: number) =>
-  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(n);
 export const fmtPct = (n: number) =>
   `${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(n)} %`;
 export const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("de-DE") : "—");
