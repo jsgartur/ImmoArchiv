@@ -26,6 +26,7 @@ import { Route as DashboardMietanpassungRouteImport } from './routes/dashboard.m
 import { Route as DashboardMaengelRouteImport } from './routes/dashboard.maengel'
 import { Route as DashboardHandwerkerRouteImport } from './routes/dashboard.handwerker'
 import { Route as DashboardFinanzierungRouteImport } from './routes/dashboard.finanzierung'
+import { Route as DashboardDokumenteRouteImport } from './routes/dashboard.dokumente'
 import { Route as DashboardAufgabenRouteImport } from './routes/dashboard.aufgaben'
 import { Route as DashboardAccountRouteImport } from './routes/dashboard.account'
 import { Route as DashboardUebergabeIndexRouteImport } from './routes/dashboard.uebergabe.index'
@@ -124,6 +125,11 @@ const DashboardFinanzierungRoute = DashboardFinanzierungRouteImport.update({
   path: '/finanzierung',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardDokumenteRoute = DashboardDokumenteRouteImport.update({
+  id: '/dokumente',
+  path: '/dokumente',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAufgabenRoute = DashboardAufgabenRouteImport.update({
   id: '/aufgaben',
   path: '/aufgaben',
@@ -156,9 +162,9 @@ const DashboardMieteIndexRoute = DashboardMieteIndexRouteImport.update({
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardDokumenteIndexRoute = DashboardDokumenteIndexRouteImport.update({
-  id: '/dokumente/',
-  path: '/dokumente/',
-  getParentRoute: () => DashboardRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardDokumenteRoute,
 } as any)
 const DashboardUebergabeIdRoute = DashboardUebergabeIdRouteImport.update({
   id: '/uebergabe/$id',
@@ -182,9 +188,9 @@ const DashboardMieteEingaengeRoute = DashboardMieteEingaengeRouteImport.update({
 } as any)
 const DashboardDokumenteObjektIdRoute =
   DashboardDokumenteObjektIdRouteImport.update({
-    id: '/dokumente/$objektId',
-    path: '/dokumente/$objektId',
-    getParentRoute: () => DashboardRoute,
+    id: '/$objektId',
+    path: '/$objektId',
+    getParentRoute: () => DashboardDokumenteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRoute
   '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/aufgaben': typeof DashboardAufgabenRoute
+  '/dashboard/dokumente': typeof DashboardDokumenteRouteWithChildren
   '/dashboard/finanzierung': typeof DashboardFinanzierungRoute
   '/dashboard/handwerker': typeof DashboardHandwerkerRoute
   '/dashboard/maengel': typeof DashboardMaengelRoute
@@ -261,6 +268,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRoute
   '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/aufgaben': typeof DashboardAufgabenRoute
+  '/dashboard/dokumente': typeof DashboardDokumenteRouteWithChildren
   '/dashboard/finanzierung': typeof DashboardFinanzierungRoute
   '/dashboard/handwerker': typeof DashboardHandwerkerRoute
   '/dashboard/maengel': typeof DashboardMaengelRoute
@@ -294,6 +302,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/dashboard/account'
     | '/dashboard/aufgaben'
+    | '/dashboard/dokumente'
     | '/dashboard/finanzierung'
     | '/dashboard/handwerker'
     | '/dashboard/maengel'
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/dashboard/account'
     | '/dashboard/aufgaben'
+    | '/dashboard/dokumente'
     | '/dashboard/finanzierung'
     | '/dashboard/handwerker'
     | '/dashboard/maengel'
@@ -508,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFinanzierungRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/dokumente': {
+      id: '/dashboard/dokumente'
+      path: '/dokumente'
+      fullPath: '/dashboard/dokumente'
+      preLoaderRoute: typeof DashboardDokumenteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/aufgaben': {
       id: '/dashboard/aufgaben'
       path: '/aufgaben'
@@ -552,10 +569,10 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/dokumente/': {
       id: '/dashboard/dokumente/'
-      path: '/dokumente'
+      path: '/'
       fullPath: '/dashboard/dokumente/'
       preLoaderRoute: typeof DashboardDokumenteIndexRouteImport
-      parentRoute: typeof DashboardRoute
+      parentRoute: typeof DashboardDokumenteRoute
     }
     '/dashboard/uebergabe/$id': {
       id: '/dashboard/uebergabe/$id'
@@ -587,17 +604,31 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/dokumente/$objektId': {
       id: '/dashboard/dokumente/$objektId'
-      path: '/dokumente/$objektId'
+      path: '/$objektId'
       fullPath: '/dashboard/dokumente/$objektId'
       preLoaderRoute: typeof DashboardDokumenteObjektIdRouteImport
-      parentRoute: typeof DashboardRoute
+      parentRoute: typeof DashboardDokumenteRoute
     }
   }
 }
 
+interface DashboardDokumenteRouteChildren {
+  DashboardDokumenteObjektIdRoute: typeof DashboardDokumenteObjektIdRoute
+  DashboardDokumenteIndexRoute: typeof DashboardDokumenteIndexRoute
+}
+
+const DashboardDokumenteRouteChildren: DashboardDokumenteRouteChildren = {
+  DashboardDokumenteObjektIdRoute: DashboardDokumenteObjektIdRoute,
+  DashboardDokumenteIndexRoute: DashboardDokumenteIndexRoute,
+}
+
+const DashboardDokumenteRouteWithChildren =
+  DashboardDokumenteRoute._addFileChildren(DashboardDokumenteRouteChildren)
+
 interface DashboardRouteChildren {
   DashboardAccountRoute: typeof DashboardAccountRoute
   DashboardAufgabenRoute: typeof DashboardAufgabenRoute
+  DashboardDokumenteRoute: typeof DashboardDokumenteRouteWithChildren
   DashboardFinanzierungRoute: typeof DashboardFinanzierungRoute
   DashboardHandwerkerRoute: typeof DashboardHandwerkerRoute
   DashboardMaengelRoute: typeof DashboardMaengelRoute
@@ -606,12 +637,10 @@ interface DashboardRouteChildren {
   DashboardPortfolioRoute: typeof DashboardPortfolioRoute
   DashboardPreiseRoute: typeof DashboardPreiseRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardDokumenteObjektIdRoute: typeof DashboardDokumenteObjektIdRoute
   DashboardMieteEingaengeRoute: typeof DashboardMieteEingaengeRoute
   DashboardNebenkostenIdRoute: typeof DashboardNebenkostenIdRoute
   DashboardObjekteIdRoute: typeof DashboardObjekteIdRoute
   DashboardUebergabeIdRoute: typeof DashboardUebergabeIdRoute
-  DashboardDokumenteIndexRoute: typeof DashboardDokumenteIndexRoute
   DashboardMieteIndexRoute: typeof DashboardMieteIndexRoute
   DashboardNebenkostenIndexRoute: typeof DashboardNebenkostenIndexRoute
   DashboardObjekteIndexRoute: typeof DashboardObjekteIndexRoute
@@ -621,6 +650,7 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAccountRoute: DashboardAccountRoute,
   DashboardAufgabenRoute: DashboardAufgabenRoute,
+  DashboardDokumenteRoute: DashboardDokumenteRouteWithChildren,
   DashboardFinanzierungRoute: DashboardFinanzierungRoute,
   DashboardHandwerkerRoute: DashboardHandwerkerRoute,
   DashboardMaengelRoute: DashboardMaengelRoute,
@@ -629,12 +659,10 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardPortfolioRoute: DashboardPortfolioRoute,
   DashboardPreiseRoute: DashboardPreiseRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardDokumenteObjektIdRoute: DashboardDokumenteObjektIdRoute,
   DashboardMieteEingaengeRoute: DashboardMieteEingaengeRoute,
   DashboardNebenkostenIdRoute: DashboardNebenkostenIdRoute,
   DashboardObjekteIdRoute: DashboardObjekteIdRoute,
   DashboardUebergabeIdRoute: DashboardUebergabeIdRoute,
-  DashboardDokumenteIndexRoute: DashboardDokumenteIndexRoute,
   DashboardMieteIndexRoute: DashboardMieteIndexRoute,
   DashboardNebenkostenIndexRoute: DashboardNebenkostenIndexRoute,
   DashboardObjekteIndexRoute: DashboardObjekteIndexRoute,

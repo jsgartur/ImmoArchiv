@@ -1,14 +1,35 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, FileSpreadsheet, ArrowRight, Trash2 } from "lucide-react";
-import { useStore, fmtEUR, fmtDate, type NkPartei } from "@/lib/store";
+import {
+  useStore,
+  fmtEUR,
+  fmtDate,
+  type Abrechnung,
+  type NkPartei,
+  type Objekt,
+} from "@/lib/store";
 import { berechneAbrechnung } from "@/lib/nebenkosten";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LadeSkeleton } from "@/components/lade-skeleton";
+import { ObjektIcon } from "@/components/objekt-icon";
 
 export const Route = createFileRoute("/dashboard/nebenkosten/")({
   component: NebenkostenListe,
@@ -39,7 +60,10 @@ function NeueAbrechnungDialog() {
       const m = mieter.find((x) => x.einheitId === e.id && !x.mietende);
       if (m) {
         // Einzug nur setzen, wenn er in den Zeitraum fällt (sonst voller Zeitraum)
-        const einzug = m.mietbeginn && m.mietbeginn.slice(0, 10) > zeitraumStart ? m.mietbeginn.slice(0, 10) : undefined;
+        const einzug =
+          m.mietbeginn && m.mietbeginn.slice(0, 10) > zeitraumStart
+            ? m.mietbeginn.slice(0, 10)
+            : undefined;
         parteien.push({
           id: uid(),
           name: m.name,
@@ -112,8 +136,8 @@ function NeueAbrechnungDialog() {
             <Label className="text-xs">Abrechnungsjahr</Label>
             <Input type="number" value={jahr} onChange={(e) => setJahr(+e.target.value)} />
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Zeitraum {`01.01.${jahr}`} – {`31.12.${jahr}`}. Parteien und Vorauszahlungen werden – wenn vorhanden –
-              aus den Mietern übernommen.
+              Zeitraum {`01.01.${jahr}`} – {`31.12.${jahr}`}. Parteien und Vorauszahlungen werden –
+              wenn vorhanden – aus den Mietern übernommen.
             </p>
           </div>
         </div>
@@ -132,7 +156,24 @@ function NebenkostenListe() {
   const objekte = useStore((s) => s.objekte);
   const removeAbrechnung = useStore((s) => s.removeAbrechnung);
   const abrechnungenGeladen = useStore((s) => s.abrechnungenGeladen);
-  const [objektFilter, setObjektFilter] = useState<string>("alle");
+
+  const gruppen = useMemo(() => {
+    const map = new Map<string, { objekt: Objekt | undefined; liste: Abrechnung[] }>();
+    for (const a of abrechnungen) {
+      if (!map.has(a.objektId)) {
+        map.set(a.objektId, { objekt: objekte.find((o) => o.id === a.objektId), liste: [] });
+      }
+      map.get(a.objektId)!.liste.push(a);
+    }
+    for (const g of map.values()) {
+      g.liste.sort((a, b) => b.von.localeCompare(a.von));
+    }
+    return Array.from(map.values()).sort((a, b) =>
+      (a.objekt?.strasse || a.objekt?.adresse || "").localeCompare(
+        b.objekt?.strasse || b.objekt?.adresse || "",
+      ),
+    );
+  }, [abrechnungen, objekte]);
 
   if (!abrechnungenGeladen) {
     return (
@@ -147,7 +188,9 @@ function NebenkostenListe() {
     <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Nebenkostenabrechnung</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+            Nebenkostenabrechnung
+          </h1>
           <p className="text-sm text-muted-foreground">
             Betriebskosten auf Ihre Mieter umlegen – nachvollziehbar und druckfertig.
           </p>
@@ -168,68 +211,61 @@ function NebenkostenListe() {
           </div>
         </div>
       ) : (
-        <>
-          <div className="flex items-center gap-2">
-            <Label className="text-xs text-muted-foreground">Objekt</Label>
-            <Select value={objektFilter} onValueChange={setObjektFilter}>
-              <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alle">Alle Objekte</SelectItem>
-                {objekte.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.strasse || o.adresse}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-          {abrechnungen
-            .filter((a) => objektFilter === "alle" || a.objektId === objektFilter)
-            .slice()
-            .sort((a, b) => {
-              const oa = objekte.find((o) => o.id === a.objektId)?.adresse ?? "";
-              const ob = objekte.find((o) => o.id === b.objektId)?.adresse ?? "";
-              return oa.localeCompare(ob) || b.von.localeCompare(a.von);
-            })
-            .map((a) => {
-              const objekt = objekte.find((o) => o.id === a.objektId);
-              const r = berechneAbrechnung(a);
-              return (
-                <Link
-                  key={a.id}
-                  to="/dashboard/nebenkosten/$id"
-                  params={{ id: a.id }}
-                  className="group rounded-xl border bg-card p-4 transition hover:border-foreground/30"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-medium">{a.titel}</div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {objekt?.adresse ?? "Objekt gelöscht"} · {fmtDate(a.von)}–{fmtDate(a.bis)}
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (confirm("Diese Abrechnung löschen?")) removeAbrechnung(a.id);
-                      }}
-                      className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
-                      aria-label="Löschen"
+        <div className="space-y-8">
+          {gruppen.map(({ objekt, liste }) => (
+            <div key={objekt?.id ?? "unbekannt"} className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <ObjektIcon
+                  bilder={objekt?.bilder}
+                  alt={objekt?.adresse ?? "Objekt"}
+                  className="h-7 w-7 shrink-0 overflow-hidden rounded-md"
+                />
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {objekt?.strasse || objekt?.adresse.split(",")[0] || "Objekt gelöscht"}
+                </h2>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {liste.map((a) => {
+                  const r = berechneAbrechnung(a);
+                  return (
+                    <Link
+                      key={a.id}
+                      to="/dashboard/nebenkosten/$id"
+                      params={{ id: a.id }}
+                      className="group rounded-xl border bg-card p-4 transition hover:border-foreground/30"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="mt-4 flex items-end justify-between border-t pt-3">
-                    <div className="text-xs text-muted-foreground">
-                      {a.parteien.length} Partei(en) · {a.positionen.length} Positionen
-                      <div className="mt-0.5">Gesamtkosten {fmtEUR(r.gesamtKosten)}</div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-medium">{a.titel}</div>
+                          <div className="mt-0.5 text-xs text-muted-foreground">
+                            {fmtDate(a.von)}–{fmtDate(a.bis)}
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (confirm("Diese Abrechnung löschen?")) removeAbrechnung(a.id);
+                          }}
+                          className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
+                          aria-label="Löschen"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="mt-4 flex items-end justify-between border-t pt-3">
+                        <div className="text-xs text-muted-foreground">
+                          {a.parteien.length} Partei(en) · {a.positionen.length} Positionen
+                          <div className="mt-0.5">Gesamtkosten {fmtEUR(r.gesamtKosten)}</div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

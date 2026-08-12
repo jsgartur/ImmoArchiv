@@ -5,6 +5,7 @@ import { useStore, fmtEUR, monatKey, monatLabel } from "@/lib/store";
 import { erwarteteMieteFuerMonat } from "@/lib/immobilienrechner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -194,7 +195,19 @@ function Mietuebersicht() {
                       className="cursor-pointer"
                       onClick={() => setMieteBezahlt(z.mieter.id, monat, !paid, z.betrag)}
                     >
-                      <TableCell className="font-medium">{z.mieter.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2.5">
+                          <Checkbox
+                            checked={paid}
+                            onClick={(e) => e.stopPropagation()}
+                            onCheckedChange={() =>
+                              setMieteBezahlt(z.mieter.id, monat, !paid, z.betrag)
+                            }
+                            aria-label={`${z.mieter.name} als ${paid ? "offen" : "bezahlt"} markieren`}
+                          />
+                          {z.mieter.name}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                           <Building2 className="h-3.5 w-3.5 shrink-0" />

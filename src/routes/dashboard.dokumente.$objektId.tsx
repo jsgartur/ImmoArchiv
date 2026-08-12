@@ -1,15 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  ChevronRight,
-  Download,
-  FileText,
-  Folder,
-  FolderPlus,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { ChevronRight, Download, FileText, Folder, FolderPlus, Trash2, Upload } from "lucide-react";
 import { useStore, fmtDate, DOKUMENT_KATEGORIEN, type DokumentKategorie } from "@/lib/store";
 import { LadeSkeleton } from "@/components/lade-skeleton";
 import { Button } from "@/components/ui/button";
@@ -224,16 +215,10 @@ function DokumenteExplorer() {
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          to="/dashboard/dokumente"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Alle Objekte
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">{objekt.adresse}</h1>
-        <p className="text-sm text-muted-foreground">
-          Grundbuch, Kaufvertrag, Grundriss, Energieausweis …
-        </p>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {objekt.strasse || objekt.adresse.split(",")[0]}
+        </h2>
+        <p className="text-sm text-muted-foreground">{objekt.adresse}</p>
       </div>
 
       {/* Breadcrumb */}
