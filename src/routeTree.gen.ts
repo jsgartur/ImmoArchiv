@@ -32,10 +32,12 @@ import { Route as DashboardUebergabeIndexRouteImport } from './routes/dashboard.
 import { Route as DashboardObjekteIndexRouteImport } from './routes/dashboard.objekte.index'
 import { Route as DashboardNebenkostenIndexRouteImport } from './routes/dashboard.nebenkosten.index'
 import { Route as DashboardMieteIndexRouteImport } from './routes/dashboard.miete.index'
+import { Route as DashboardDokumenteIndexRouteImport } from './routes/dashboard.dokumente.index'
 import { Route as DashboardUebergabeIdRouteImport } from './routes/dashboard.uebergabe.$id'
 import { Route as DashboardObjekteIdRouteImport } from './routes/dashboard.objekte.$id'
 import { Route as DashboardNebenkostenIdRouteImport } from './routes/dashboard.nebenkosten.$id'
 import { Route as DashboardMieteEingaengeRouteImport } from './routes/dashboard.miete.eingaenge'
+import { Route as DashboardDokumenteObjektIdRouteImport } from './routes/dashboard.dokumente.$objektId'
 
 const PortalRoute = PortalRouteImport.update({
   id: '/portal',
@@ -153,6 +155,11 @@ const DashboardMieteIndexRoute = DashboardMieteIndexRouteImport.update({
   path: '/miete/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardDokumenteIndexRoute = DashboardDokumenteIndexRouteImport.update({
+  id: '/dokumente/',
+  path: '/dokumente/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardUebergabeIdRoute = DashboardUebergabeIdRouteImport.update({
   id: '/uebergabe/$id',
   path: '/uebergabe/$id',
@@ -173,6 +180,12 @@ const DashboardMieteEingaengeRoute = DashboardMieteEingaengeRouteImport.update({
   path: '/miete/eingaenge',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardDokumenteObjektIdRoute =
+  DashboardDokumenteObjektIdRouteImport.update({
+    id: '/dokumente/$objektId',
+    path: '/dokumente/$objektId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,10 +207,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/dokumente/$objektId': typeof DashboardDokumenteObjektIdRoute
   '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/dokumente/': typeof DashboardDokumenteIndexRoute
   '/dashboard/miete/': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten/': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte/': typeof DashboardObjekteIndexRoute
@@ -222,10 +237,12 @@ export interface FileRoutesByTo {
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/dokumente/$objektId': typeof DashboardDokumenteObjektIdRoute
   '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/dokumente': typeof DashboardDokumenteIndexRoute
   '/dashboard/miete': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte': typeof DashboardObjekteIndexRoute
@@ -252,10 +269,12 @@ export interface FileRoutesById {
   '/dashboard/portfolio': typeof DashboardPortfolioRoute
   '/dashboard/preise': typeof DashboardPreiseRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/dokumente/$objektId': typeof DashboardDokumenteObjektIdRoute
   '/dashboard/miete/eingaenge': typeof DashboardMieteEingaengeRoute
   '/dashboard/nebenkosten/$id': typeof DashboardNebenkostenIdRoute
   '/dashboard/objekte/$id': typeof DashboardObjekteIdRoute
   '/dashboard/uebergabe/$id': typeof DashboardUebergabeIdRoute
+  '/dashboard/dokumente/': typeof DashboardDokumenteIndexRoute
   '/dashboard/miete/': typeof DashboardMieteIndexRoute
   '/dashboard/nebenkosten/': typeof DashboardNebenkostenIndexRoute
   '/dashboard/objekte/': typeof DashboardObjekteIndexRoute
@@ -283,10 +302,12 @@ export interface FileRouteTypes {
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard/'
+    | '/dashboard/dokumente/$objektId'
     | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/dokumente/'
     | '/dashboard/miete/'
     | '/dashboard/nebenkosten/'
     | '/dashboard/objekte/'
@@ -311,10 +332,12 @@ export interface FileRouteTypes {
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard'
+    | '/dashboard/dokumente/$objektId'
     | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/dokumente'
     | '/dashboard/miete'
     | '/dashboard/nebenkosten'
     | '/dashboard/objekte'
@@ -340,10 +363,12 @@ export interface FileRouteTypes {
     | '/dashboard/portfolio'
     | '/dashboard/preise'
     | '/dashboard/'
+    | '/dashboard/dokumente/$objektId'
     | '/dashboard/miete/eingaenge'
     | '/dashboard/nebenkosten/$id'
     | '/dashboard/objekte/$id'
     | '/dashboard/uebergabe/$id'
+    | '/dashboard/dokumente/'
     | '/dashboard/miete/'
     | '/dashboard/nebenkosten/'
     | '/dashboard/objekte/'
@@ -525,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMieteIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/dokumente/': {
+      id: '/dashboard/dokumente/'
+      path: '/dokumente'
+      fullPath: '/dashboard/dokumente/'
+      preLoaderRoute: typeof DashboardDokumenteIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/uebergabe/$id': {
       id: '/dashboard/uebergabe/$id'
       path: '/uebergabe/$id'
@@ -553,6 +585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMieteEingaengeRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/dokumente/$objektId': {
+      id: '/dashboard/dokumente/$objektId'
+      path: '/dokumente/$objektId'
+      fullPath: '/dashboard/dokumente/$objektId'
+      preLoaderRoute: typeof DashboardDokumenteObjektIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -567,10 +606,12 @@ interface DashboardRouteChildren {
   DashboardPortfolioRoute: typeof DashboardPortfolioRoute
   DashboardPreiseRoute: typeof DashboardPreiseRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardDokumenteObjektIdRoute: typeof DashboardDokumenteObjektIdRoute
   DashboardMieteEingaengeRoute: typeof DashboardMieteEingaengeRoute
   DashboardNebenkostenIdRoute: typeof DashboardNebenkostenIdRoute
   DashboardObjekteIdRoute: typeof DashboardObjekteIdRoute
   DashboardUebergabeIdRoute: typeof DashboardUebergabeIdRoute
+  DashboardDokumenteIndexRoute: typeof DashboardDokumenteIndexRoute
   DashboardMieteIndexRoute: typeof DashboardMieteIndexRoute
   DashboardNebenkostenIndexRoute: typeof DashboardNebenkostenIndexRoute
   DashboardObjekteIndexRoute: typeof DashboardObjekteIndexRoute
@@ -588,10 +629,12 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardPortfolioRoute: DashboardPortfolioRoute,
   DashboardPreiseRoute: DashboardPreiseRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardDokumenteObjektIdRoute: DashboardDokumenteObjektIdRoute,
   DashboardMieteEingaengeRoute: DashboardMieteEingaengeRoute,
   DashboardNebenkostenIdRoute: DashboardNebenkostenIdRoute,
   DashboardObjekteIdRoute: DashboardObjekteIdRoute,
   DashboardUebergabeIdRoute: DashboardUebergabeIdRoute,
+  DashboardDokumenteIndexRoute: DashboardDokumenteIndexRoute,
   DashboardMieteIndexRoute: DashboardMieteIndexRoute,
   DashboardNebenkostenIndexRoute: DashboardNebenkostenIndexRoute,
   DashboardObjekteIndexRoute: DashboardObjekteIndexRoute,

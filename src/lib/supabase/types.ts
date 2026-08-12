@@ -244,6 +244,7 @@ export interface Database {
           user_id: string;
           objekt_id: string | null;
           mieter_id: string | null;
+          ordner_id: string | null;
           name: string;
           kategorie: string;
           storage_path: string;
@@ -253,6 +254,19 @@ export interface Database {
         };
         Insert: Partial<Database["public"]["Tables"]["dokumente"]["Row"]> & { name: string; storage_path: string };
         Update: Partial<Database["public"]["Tables"]["dokumente"]["Row"]>;
+        Relationships: [];
+      };
+      dokument_ordner: {
+        Row: {
+          id: string;
+          user_id: string;
+          objekt_id: string;
+          parent_id: string | null;
+          name: string;
+          erstellt_am: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["dokument_ordner"]["Row"]> & { objekt_id: string; name: string };
+        Update: Partial<Database["public"]["Tables"]["dokument_ordner"]["Row"]>;
         Relationships: [];
       };
       handwerker: {

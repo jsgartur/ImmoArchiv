@@ -1,21 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  Circle,
-  Coins,
-  ArrowRight,
-  Building2,
-} from "lucide-react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { ArrowRight, Building2, ChevronLeft, ChevronRight, Coins, Search } from "lucide-react";
 import { useStore, fmtEUR, monatKey, monatLabel } from "@/lib/store";
 import { erwarteteMieteFuerMonat } from "@/lib/immobilienrechner";
 import { LadeSkeleton } from "@/components/lade-skeleton";
-import { PageTabs, MIETE_TABS } from "@/components/page-tabs";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const Route = createFileRoute("/dashboard/miete/eingaenge")({
-  component: Mieteingaenge,
+  component: Mietuebersicht,
 });
 
 const shiftMonat = (key: string, delta: number) => {
@@ -23,7 +24,35 @@ const shiftMonat = (key: string, delta: number) => {
   return monatKey(new Date(y, m - 1 + delta, 1));
 };
 
-function Mieteingaenge() {
+function StatKachel({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "destructive" | "accent" | "pos";
+}) {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div
+        className={
+          "text-3xl font-semibold tabular-nums " +
+          (tone === "destructive"
+            ? "text-destructive"
+            : tone === "accent"
+              ? "text-amber-600"
+              : "text-blue-600")
+        }
+      >
+        {value}
+      </div>
+      <div className="mt-1 text-sm text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function Mietuebersicht() {
   const objekte = useStore((s) => s.objekte);
   const einheiten = useStore((s) => s.einheiten);
   const mieter = useStore((s) => s.mieter);
@@ -34,91 +63,90 @@ function Mieteingaenge() {
   const mieterGeladen = useStore((s) => s.mieterGeladen);
   const mietzahlungenGeladen = useStore((s) => s.mietzahlungenGeladen);
   const [monat, setMonat] = useState(monatKey());
+  const [suche, setSuche] = useState("");
+
+  const istBezahlt = (mieterId: string) =>
+    mietzahlungen.some((z) => z.mieterId === mieterId && z.monat === monat);
+
+  const zeilen = useMemo(() => {
+    return mieter
+      .map((m) => {
+        const einheit = einheiten.find((e) => e.id === m.einheitId);
+        const objekt = einheit ? objekte.find((o) => o.id === einheit.objektId) : undefined;
+        const betrag = erwarteteMieteFuerMonat(m, monat);
+        return { mieter: m, einheit, objekt, betrag };
+      })
+      .filter((z) => z.betrag > 0 && z.objekt)
+      .filter(
+        (z) =>
+          !suche.trim() ||
+          z.mieter.name.toLowerCase().includes(suche.trim().toLowerCase()) ||
+          z.objekt!.adresse.toLowerCase().includes(suche.trim().toLowerCase()),
+      )
+      .sort(
+        (a, b) =>
+          a.objekt!.adresse.localeCompare(b.objekt!.adresse) ||
+          a.mieter.name.localeCompare(b.mieter.name),
+      );
+  }, [mieter, einheiten, objekte, monat, suche]);
 
   if (!objekteGeladen || !einheitenGeladen || !mieterGeladen || !mietzahlungenGeladen) {
     return (
       <LadeSkeleton
-        titel="Mieteingänge"
+        titel="Mietübersicht"
         text="Behalten Sie den Überblick, wer die Miete schon gezahlt hat."
       />
     );
   }
 
-  const istBezahlt = (mieterId: string) =>
-    mietzahlungen.some((z) => z.mieterId === mieterId && z.monat === monat);
-
-  // Alle Mieter, die in diesem Monat (anteilig) Miete schulden, gruppiert nach Objekt.
-  const gruppen = objekte
-    .map((o) => {
-      const einheitenIds = einheiten.filter((e) => e.objektId === o.id).map((e) => e.id);
-      const zeilen = mieter
-        .filter((m) => einheitenIds.includes(m.einheitId))
-        .map((m) => ({
-          mieter: m,
-          einheit: einheiten.find((e) => e.id === m.einheitId),
-          betrag: erwarteteMieteFuerMonat(m, monat),
-        }))
-        .filter((z) => z.betrag > 0);
-      return { objekt: o, zeilen };
-    })
-    .filter((g) => g.zeilen.length > 0)
-    .sort((a, b) => a.objekt.adresse.localeCompare(b.objekt.adresse));
-
-  const alleZeilen = gruppen.flatMap((g) => g.zeilen);
-  const erwartet = alleZeilen.reduce((s, z) => s + z.betrag, 0);
-  const eingegangen = alleZeilen
-    .filter((z) => istBezahlt(z.mieter.id))
-    .reduce((s, z) => s + z.betrag, 0);
-  const offen = erwartet - eingegangen;
-  const anzahlOffen = alleZeilen.filter((z) => !istBezahlt(z.mieter.id)).length;
+  const istVergangenerMonat = monat < monatKey();
+  const bezahlt = zeilen.filter((z) => istBezahlt(z.mieter.id));
+  const offen = zeilen.filter((z) => !istBezahlt(z.mieter.id));
+  const ueberfaellig = istVergangenerMonat ? offen : [];
+  const erwartet = istVergangenerMonat ? [] : offen;
   const istAktuellerMonat = monat === monatKey();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mieteingänge</h1>
-        <p className="text-sm text-muted-foreground">
-          Behalten Sie den Überblick, wer die Miete schon gezahlt hat — je Mieter und Objekt.
-        </p>
-      </div>
-
-      <PageTabs tabs={MIETE_TABS} />
-
-      {/* Monatsnavigation */}
-      <div className="flex items-center justify-between rounded-xl border bg-card p-3">
-        <button
-          onClick={() => setMonat((m) => shiftMonat(m, -1))}
-          className="grid h-9 w-9 place-items-center rounded-md hover:bg-accent"
-          aria-label="Vorheriger Monat"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <div className="text-center">
-          <div className="font-medium">{monatLabel(monat)}</div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mietübersicht</h1>
+          <p className="text-sm text-muted-foreground">
+            Behalten Sie den Überblick, wer die Miete schon gezahlt hat.
+          </p>
+        </div>
+        <div className="flex items-center gap-1 rounded-xl border bg-card p-1">
+          <button
+            onClick={() => setMonat((m) => shiftMonat(m, -1))}
+            className="grid h-8 w-8 place-items-center rounded-md hover:bg-accent"
+            aria-label="Vorheriger Monat"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="min-w-32 text-center text-sm font-medium">{monatLabel(monat)}</div>
+          <button
+            onClick={() => setMonat((m) => shiftMonat(m, 1))}
+            className="grid h-8 w-8 place-items-center rounded-md hover:bg-accent"
+            aria-label="Nächster Monat"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
           {!istAktuellerMonat && (
             <button
               onClick={() => setMonat(monatKey())}
-              className="text-xs text-primary hover:underline"
+              className="ml-1 px-2 text-xs text-primary hover:underline"
             >
-              Zum aktuellen Monat
+              Heute
             </button>
           )}
         </div>
-        <button
-          onClick={() => setMonat((m) => shiftMonat(m, 1))}
-          className="grid h-9 w-9 place-items-center rounded-md hover:bg-accent"
-          aria-label="Nächster Monat"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
       </div>
 
-      {gruppen.length === 0 ? (
+      {zeilen.length === 0 && !suche ? (
         <div className="rounded-2xl border border-dashed p-10 text-center">
           <Coins className="mx-auto h-10 w-10 text-muted-foreground" />
           <p className="mt-3 text-sm text-muted-foreground">
-            Für {monatLabel(monat)} sind keine Mieter mit Kaltmiete hinterlegt. Legen Sie einen
-            Mieter bei einer Einheit an, um Mieteingänge zu verfolgen.
+            Für {monatLabel(monat)} sind keine Mieter mit Kaltmiete hinterlegt.
           </p>
           <Link
             to="/dashboard/miete"
@@ -129,86 +157,90 @@ function Mieteingaenge() {
         </div>
       ) : (
         <>
-          {/* Gesamt-Summen */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border bg-card p-4">
-              <div className="text-xs text-muted-foreground">Erwartet (gesamt)</div>
-              <div className="mt-1 text-2xl font-semibold tabular-nums">{fmtEUR(erwartet)}</div>
-            </div>
-            <div className="rounded-xl border bg-card p-4">
-              <div className="text-xs text-muted-foreground">Eingegangen</div>
-              <div className="mt-1 text-2xl font-semibold tabular-nums text-blue-600">
-                {fmtEUR(eingegangen)}
-              </div>
-            </div>
-            <div className="rounded-xl border bg-card p-4">
-              <div className="text-xs text-muted-foreground">Offen ({anzahlOffen})</div>
-              <div
-                className={
-                  "mt-1 text-2xl font-semibold tabular-nums " +
-                  (offen > 0 ? "text-amber-600" : "text-muted-foreground")
-                }
-              >
-                {fmtEUR(offen)}
-              </div>
-            </div>
+            <StatKachel label="Überfällig" value={ueberfaellig.length} tone="destructive" />
+            <StatKachel label="Erwartet" value={erwartet.length} tone="accent" />
+            <StatKachel label="Bezahlt" value={bezahlt.length} tone="pos" />
           </div>
 
-          {/* Je Objekt gruppiert */}
-          <div className="space-y-4">
-            {gruppen.map(({ objekt, zeilen }) => {
-              const objErwartet = zeilen.reduce((s, z) => s + z.betrag, 0);
-              const objEingegangen = zeilen
-                .filter((z) => istBezahlt(z.mieter.id))
-                .reduce((s, z) => s + z.betrag, 0);
-              return (
-                <div key={objekt.id} className="rounded-2xl border bg-card">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b p-4">
-                    <Link
-                      to="/dashboard/objekte/$id"
-                      params={{ id: objekt.id }}
-                      className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+          <div className="relative max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Suchen…"
+              value={suche}
+              onChange={(e) => setSuche(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Name</TableHead>
+                  <TableHead>Objekt</TableHead>
+                  <TableHead>Zweck</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Betrag</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {zeilen.map((z) => {
+                  const paid = istBezahlt(z.mieter.id);
+                  const status = paid ? "bezahlt" : istVergangenerMonat ? "ueberfaellig" : "offen";
+                  return (
+                    <TableRow
+                      key={z.mieter.id}
+                      className="cursor-pointer"
+                      onClick={() => setMieteBezahlt(z.mieter.id, monat, !paid, z.betrag)}
                     >
-                      <Building2 className="h-4 w-4" />
-                      {objekt.strasse || objekt.adresse}
-                    </Link>
-                    <div className="text-xs text-muted-foreground">
-                      {fmtEUR(objEingegangen)} von {fmtEUR(objErwartet)} eingegangen
-                    </div>
-                  </div>
-                  <div className="divide-y">
-                    {zeilen.map(({ mieter: m, einheit, betrag }) => {
-                      const paid = istBezahlt(m.id);
-                      const prorated = betrag !== (m.kaltmiete ?? 0);
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => setMieteBezahlt(m.id, monat, !paid, betrag)}
-                          className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-accent/50"
-                        >
-                          {paid ? (
-                            <CheckCircle2 className="h-7 w-7 shrink-0 text-blue-600" />
-                          ) : (
-                            <Circle className="h-7 w-7 shrink-0 text-amber-500" />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate font-medium">{m.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {einheit?.bezeichnung ?? "—"} · {paid ? "bezahlt" : "offen"}
-                              {prorated ? " · anteilig (Ein-/Auszug)" : ""}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium tabular-nums">{fmtEUR(betrag)}</div>
-                            <div className="text-[11px] text-muted-foreground">Kaltmiete</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+                      <TableCell className="font-medium">{z.mieter.name}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 shrink-0" />
+                          {z.objekt!.strasse || z.objekt!.adresse.split(",")[0]}
+                        </div>
+                        {z.einheit && <div className="pl-5 text-xs">{z.einheit.bezeichnung}</div>}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        Miete {monatLabel(monat)}
+                      </TableCell>
+                      <TableCell>
+                        {status === "bezahlt" ? (
+                          <Badge variant="outline" className="border-blue-500/40 text-blue-600">
+                            Bezahlt
+                          </Badge>
+                        ) : status === "ueberfaellig" ? (
+                          <Badge
+                            variant="outline"
+                            className="border-destructive/40 text-destructive"
+                          >
+                            Überfällig
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="border-amber-500/40 text-amber-600">
+                            Offen
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">
+                        {fmtEUR(z.betrag)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {zeilen.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="py-8 text-center text-sm text-muted-foreground"
+                    >
+                      Keine Treffer.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
           <p className="text-xs text-muted-foreground">
             Tipp: Auf eine Zeile klicken schaltet zwischen „bezahlt" und „offen" um.

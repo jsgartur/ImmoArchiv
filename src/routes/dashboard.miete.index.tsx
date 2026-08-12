@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import { Building2, KeyRound, Pencil, Plus, Users } from "lucide-react";
 import { useStore, fmtDate, type Objekt, type Einheit, type Mieter } from "@/lib/store";
 import { LadeSkeleton } from "@/components/lade-skeleton";
-import { PageTabs, MIETE_TABS } from "@/components/page-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -271,8 +270,6 @@ function Mietverhaeltnisse() {
         </div>
         <NeuerMieterDialog vakante={vakante} />
       </div>
-
-      <PageTabs tabs={MIETE_TABS} />
 
       {zeilen.length === 0 ? (
         <div className="rounded-2xl border border-dashed p-10 text-center">

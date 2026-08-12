@@ -3,12 +3,24 @@ import { useState } from "react";
 import { Plus, ClipboardList, ArrowRight, LogIn, LogOut as LogOutIcon } from "lucide-react";
 import { useStore, fmtDate, type UebergabeTyp } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LadeSkeleton } from "@/components/lade-skeleton";
-import { PageTabs, AUFGABEN_TABS } from "@/components/page-tabs";
 import { ProGate } from "@/components/pro-gate";
 import { istPro } from "@/lib/plaene";
 
@@ -110,7 +122,12 @@ function UebergabeListe() {
   const plan = useStore((s) => s.profil.plan);
 
   if (!geladen) {
-    return <LadeSkeleton titel="Übergabeprotokolle" text="Ein- und Auszug dokumentieren – mit Fotos und Unterschrift." />;
+    return (
+      <LadeSkeleton
+        titel="Übergabeprotokolle"
+        text="Ein- und Auszug dokumentieren – mit Fotos und Unterschrift."
+      />
+    );
   }
 
   if (!istPro(plan)) {
@@ -118,9 +135,10 @@ function UebergabeListe() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Übergabeprotokolle</h1>
-          <p className="text-sm text-muted-foreground">Ein- und Auszug dokumentieren – mit Fotos und Unterschrift.</p>
+          <p className="text-sm text-muted-foreground">
+            Ein- und Auszug dokumentieren – mit Fotos und Unterschrift.
+          </p>
         </div>
-        <PageTabs tabs={AUFGABEN_TABS} />
         <ProGate feature="Übergabeprotokolle">{null}</ProGate>
       </div>
     );
@@ -133,16 +151,19 @@ function UebergabeListe() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Übergabeprotokolle</h1>
-          <p className="text-sm text-muted-foreground">Ein- und Auszug dokumentieren – mit Fotos und Unterschrift.</p>
+          <p className="text-sm text-muted-foreground">
+            Ein- und Auszug dokumentieren – mit Fotos und Unterschrift.
+          </p>
         </div>
         <NeuesProtokollDialog />
       </div>
-      <PageTabs tabs={AUFGABEN_TABS} />
 
       {sortiert.length === 0 ? (
         <div className="rounded-2xl border border-dashed p-10 text-center">
           <ClipboardList className="mx-auto h-10 w-10 text-muted-foreground" />
-          <p className="mt-3 text-sm text-muted-foreground">Noch keine Übergabeprotokolle angelegt.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Noch keine Übergabeprotokolle angelegt.
+          </p>
         </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">

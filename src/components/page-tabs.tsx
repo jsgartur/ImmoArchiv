@@ -40,13 +40,7 @@ export const PORTFOLIO_TABS: TabItem[] = [
   { to: "/dashboard/finanzierung", label: "Restschuld" },
 ];
 
-export const MIETE_TABS: TabItem[] = [
-  { to: "/dashboard/miete", label: "Mietverhältnisse" },
-  { to: "/dashboard/miete/eingaenge", label: "Mieteingänge" },
-];
-
 export const AUFGABEN_TABS: TabItem[] = [
   { to: "/dashboard/aufgaben", label: "Aufgaben" },
   { to: "/dashboard/maengel", label: "Mängel" },
-  { to: "/dashboard/uebergabe", label: "Übergabeprotokolle" },
 ];

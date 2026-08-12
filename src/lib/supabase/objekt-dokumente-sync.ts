@@ -13,14 +13,18 @@ export interface ObjektDokument {
   storagePath: string;
   groesse: number | null;
   hochgeladenAm: string;
+  ordnerId: string | null;
 }
 
-export async function fetchObjektDokumente(objektId: string): Promise<ObjektDokument[]> {
-  const { data, error } = await supabase
-    .from("dokumente")
-    .select("*")
-    .eq("objekt_id", objektId)
-    .order("hochgeladen_am", { ascending: false });
+export async function fetchObjektDokumente(
+  objektId: string,
+  ordnerId?: string | null,
+): Promise<ObjektDokument[]> {
+  let query = supabase.from("dokumente").select("*").eq("objekt_id", objektId);
+  if (ordnerId !== undefined) {
+    query = ordnerId === null ? query.is("ordner_id", null) : query.eq("ordner_id", ordnerId);
+  }
+  const { data, error } = await query.order("hochgeladen_am", { ascending: false });
   if (error) throw error;
   return (data ?? []).map((d) => ({
     id: d.id,
@@ -29,6 +33,7 @@ export async function fetchObjektDokumente(objektId: string): Promise<ObjektDoku
     storagePath: d.storage_path,
     groesse: d.groesse,
     hochgeladenAm: d.hochgeladen_am,
+    ordnerId: d.ordner_id,
   }));
 }
 
@@ -36,6 +41,7 @@ export async function uploadObjektDokument(
   objektId: string,
   file: File,
   kategorie: string,
+  ordnerId: string | null = null,
 ): Promise<ObjektDokument> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
@@ -46,7 +52,15 @@ export async function uploadObjektDokument(
   const user_id = await effektiverEigentuemerId();
   const { data, error } = await supabase
     .from("dokumente")
-    .insert({ user_id, objekt_id: objektId, name: file.name, kategorie, storage_path: pfad, groesse: file.size })
+    .insert({
+      user_id,
+      objekt_id: objektId,
+      ordner_id: ordnerId,
+      name: file.name,
+      kategorie,
+      storage_path: pfad,
+      groesse: file.size,
+    })
     .select()
     .single();
   if (error) throw error;
@@ -58,6 +72,7 @@ export async function uploadObjektDokument(
     storagePath: data.storage_path,
     groesse: data.groesse,
     hochgeladenAm: data.hochgeladen_am,
+    ordnerId: data.ordner_id,
   };
 }
 

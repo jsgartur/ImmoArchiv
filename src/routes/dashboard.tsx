@@ -15,6 +15,9 @@ import {
   LogOut,
   QrCode,
   ChevronDown,
+  Users,
+  FolderOpen,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -43,10 +46,13 @@ type NavItem = { to: string; label: string; icon: typeof Building2; exact?: bool
 const nav: NavItem[] = [
   { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/objekte", label: "Objekte", icon: Building2 },
-  { to: "/dashboard/miete", label: "Mieteingänge", icon: Coins },
+  { to: "/dashboard/miete", label: "Mietverhältnisse", icon: Users },
+  { to: "/dashboard/miete/eingaenge", label: "Mietübersicht", icon: Coins },
   { to: "/dashboard/nebenkosten", label: "Nebenkosten", icon: ReceiptText },
+  { to: "/dashboard/dokumente", label: "Dokumente", icon: FolderOpen },
   { to: "/dashboard/mieterportal", label: "Mieterportal", icon: QrCode },
   { to: "/dashboard/aufgaben", label: "Aufgaben", icon: ListChecks },
+  { to: "/dashboard/uebergabe", label: "Übergabeprotokolle", icon: ClipboardCheck },
   { to: "/dashboard/portfolio", label: "Portfolio", icon: PieChart },
   { to: "/dashboard/mietanpassung", label: "Mietanpassung", icon: Calculator },
 ];
