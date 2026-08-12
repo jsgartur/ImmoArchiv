@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, ClipboardList, ArrowRight, LogIn, LogOut as LogOutIcon } from "lucide-react";
+import { Plus, ClipboardList, LogIn, LogOut as LogOutIcon } from "lucide-react";
 import { useStore, fmtDate, type UebergabeTyp } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ObjektBild } from "@/components/objekt-bild";
 import {
   Dialog,
   DialogContent,
@@ -118,6 +120,7 @@ function UebergabeListe() {
   const protokolle = useStore((s) => s.uebergabeprotokolle);
   const objekte = useStore((s) => s.objekte);
   const einheiten = useStore((s) => s.einheiten);
+  const mieter = useStore((s) => s.mieter);
   const geladen = useStore((s) => s.uebergabeprotokolleGeladen);
   const plan = useStore((s) => s.profil.plan);
 
@@ -170,24 +173,80 @@ function UebergabeListe() {
           {sortiert.map((p) => {
             const einheit = einheiten.find((e) => e.id === p.einheitId);
             const objekt = objekte.find((o) => o.id === einheit?.objektId);
+            const m = mieter.find((x) => x.id === p.mieterId);
             const Icon = p.typ === "einzug" ? LogIn : LogOutIcon;
+            const vollstaendig = !!p.unterschriftMieter && !!p.unterschriftVermieter;
             return (
               <Link
                 key={p.id}
                 to="/dashboard/uebergabe/$id"
                 params={{ id: p.id }}
-                className="group flex items-start justify-between gap-2 rounded-xl border bg-card p-4 hover:border-foreground/30"
+                className="group overflow-hidden rounded-xl border bg-card transition hover:border-foreground/30"
               >
-                <div className="min-w-0">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    <Icon className="h-3.5 w-3.5" /> {p.typ === "einzug" ? "Einzug" : "Auszug"}
+                {objekt?.bilder && objekt.bilder.length > 0 ? (
+                  <div className="relative h-40 w-full overflow-hidden bg-muted">
+                    <ObjektBild
+                      pfad={objekt.bilder[0]}
+                      alt={objekt.adresse}
+                      className="h-full w-full object-cover transition group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 bg-gradient-to-b from-black/50 to-transparent p-2">
+                      <Badge variant="secondary" className="inline-flex items-center gap-1">
+                        <Icon className="h-3 w-3" /> {p.typ === "einzug" ? "Einzug" : "Auszug"}
+                      </Badge>
+                      {vollstaendig ? (
+                        <Badge
+                          variant="outline"
+                          className="border-blue-500/40 bg-background/80 text-blue-600"
+                        >
+                          unterschrieben
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-background/80">
+                          offen
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-1 truncate font-medium">
-                    {objekt?.strasse || objekt?.adresse.split(",")[0]} · {einheit?.bezeichnung}
+                ) : (
+                  <div className="flex items-start justify-between gap-2 px-4 pt-4">
+                    <Badge variant="secondary" className="inline-flex items-center gap-1">
+                      <Icon className="h-3 w-3" /> {p.typ === "einzug" ? "Einzug" : "Auszug"}
+                    </Badge>
+                    {vollstaendig ? (
+                      <Badge variant="outline" className="border-blue-500/40 text-blue-600">
+                        unterschrieben
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">offen</Badge>
+                    )}
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">{fmtDate(p.datum)}</div>
+                )}
+                <div className="p-4 pt-3">
+                  <div className="font-medium leading-tight">
+                    {objekt?.strasse || objekt?.adresse.split(",")[0] || "Objekt gelöscht"}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">{einheit?.bezeichnung}</div>
+
+                  <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t pt-3 text-xs">
+                    <div>
+                      <dt className="text-muted-foreground">Datum</dt>
+                      <dd className="font-medium">{fmtDate(p.datum)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Mieter</dt>
+                      <dd className="truncate font-medium">{m?.name || "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Räume</dt>
+                      <dd className="font-medium">{p.raeume.length || "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">Zählerstände</dt>
+                      <dd className="font-medium">{p.zaehlerstaende.length || "—"}</dd>
+                    </div>
+                  </dl>
                 </div>
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
               </Link>
             );
           })}

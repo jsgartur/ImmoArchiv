@@ -47,7 +47,7 @@ const nav: NavItem[] = [
   { to: "/dashboard", label: "Übersicht", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/objekte", label: "Objekte", icon: Building2 },
   { to: "/dashboard/miete", label: "Mietverhältnisse", icon: Users },
-  { to: "/dashboard/miete/eingaenge", label: "Mietübersicht", icon: Coins },
+  { to: "/dashboard/miete/eingaenge", label: "Mieteingänge", icon: Coins },
   { to: "/dashboard/nebenkosten", label: "Nebenkosten", icon: ReceiptText },
   { to: "/dashboard/dokumente", label: "Dokumente", icon: FolderOpen },
   { to: "/dashboard/mieterportal", label: "Mieterportal", icon: QrCode },

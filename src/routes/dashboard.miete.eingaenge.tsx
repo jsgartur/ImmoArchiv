@@ -92,12 +92,7 @@ function Mietuebersicht() {
   }, [mieter, einheiten, objekte, monat, suche]);
 
   if (!objekteGeladen || !einheitenGeladen || !mieterGeladen || !mietzahlungenGeladen) {
-    return (
-      <LadeSkeleton
-        titel="Mietübersicht"
-        text="Behalten Sie den Überblick, wer die Miete schon gezahlt hat."
-      />
-    );
+    return <LadeSkeleton titel="Mieteingänge" text="Miete abhaken, sobald sie eingegangen ist." />;
   }
 
   const istVergangenerMonat = monat < monatKey();
@@ -111,9 +106,9 @@ function Mietuebersicht() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mietübersicht</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mieteingänge</h1>
           <p className="text-sm text-muted-foreground">
-            Behalten Sie den Überblick, wer die Miete schon gezahlt hat.
+            Miete abhaken, sobald sie eingegangen ist.
           </p>
         </div>
         <div className="flex items-center gap-1 rounded-xl border bg-card p-1">
@@ -256,7 +251,8 @@ function Mietuebersicht() {
             </Table>
           </div>
           <p className="text-xs text-muted-foreground">
-            Tipp: Auf eine Zeile klicken schaltet zwischen „bezahlt" und „offen" um.
+            Tipp: Häkchen setzen oder auf eine Zeile klicken schaltet zwischen „bezahlt" und „offen"
+            um.
           </p>
         </>
       )}

@@ -11,18 +11,20 @@ import {
   ArrowRight,
   PackageOpen,
 } from "lucide-react";
-import { useStore, fmtEUR, fmtEUR0, fmtPct } from "@/lib/store";
+import { useStore, fmtEUR0, fmtPct } from "@/lib/store";
 import { berechneKennzahlen, berechneTilgung, portfolioKennzahlen } from "@/lib/immobilienrechner";
 import { DonutCard, AreaCard, BarCard } from "@/components/charts";
 import { PageTabs, PORTFOLIO_TABS } from "@/components/page-tabs";
 import { ProGate } from "@/components/pro-gate";
 import { istPro } from "@/lib/plaene";
+import { ObjektIcon } from "@/components/objekt-icon";
 
 export const Route = createFileRoute("/dashboard/portfolio")({
   component: Portfolio,
 });
 
-const kurz = (o: { strasse?: string; adresse: string }) => o.strasse?.trim() || o.adresse.split(",")[0];
+const kurz = (o: { strasse?: string; adresse: string }) =>
+  o.strasse?.trim() || o.adresse.split(",")[0];
 
 function Stat({
   label,
@@ -66,7 +68,9 @@ function Portfolio() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Portfolioübersicht</h1>
-          <p className="text-sm text-muted-foreground">Ihr gesamtes Immobilienvermögen auf einen Blick.</p>
+          <p className="text-sm text-muted-foreground">
+            Ihr gesamtes Immobilienvermögen auf einen Blick.
+          </p>
         </div>
         <PageTabs tabs={PORTFOLIO_TABS} />
         <ProGate feature="Portfolio-Auswertungen">{null}</ProGate>
@@ -79,13 +83,18 @@ function Portfolio() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Portfolioübersicht</h1>
-          <p className="text-sm text-muted-foreground">Ihr gesamtes Immobilienvermögen auf einen Blick.</p>
+          <p className="text-sm text-muted-foreground">
+            Ihr gesamtes Immobilienvermögen auf einen Blick.
+          </p>
         </div>
         <PageTabs tabs={PORTFOLIO_TABS} />
         <div className="rounded-2xl border border-dashed p-10 text-center">
           <PackageOpen className="mx-auto h-10 w-10 text-muted-foreground" />
           <p className="mt-3 text-sm text-muted-foreground">Noch keine Objekte im Portfolio.</p>
-          <Link to="/dashboard/objekte" className="mt-4 inline-flex items-center gap-1 text-sm text-primary hover:underline">
+          <Link
+            to="/dashboard/objekte"
+            className="mt-4 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
             Zu den Objekten <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -115,16 +124,32 @@ function Portfolio() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Portfolioübersicht</h1>
         <p className="text-sm text-muted-foreground">
-          Ihr gesamtes Immobilienvermögen aus {p.anzahl} Objekt{p.anzahl === 1 ? "" : "en"} auf einen Blick.
+          Ihr gesamtes Immobilienvermögen aus {p.anzahl} Objekt{p.anzahl === 1 ? "" : "en"} auf
+          einen Blick.
         </p>
       </div>
       <PageTabs tabs={PORTFOLIO_TABS} />
 
       {/* Kennzahlen */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Gesamtwert (Marktwert)" value={fmtEUR0(p.gesamtMarktwert)} hint={`Kaufpreis: ${fmtEUR0(p.gesamtinvestition)}`} icon={Home} />
-        <Stat label="Gesamte Restschuld" value={fmtEUR0(p.gesamtRestschuld)} icon={Landmark} hint="alle Darlehen heute" />
-        <Stat label="Eingesetztes Eigenkapital" value={fmtEUR0(p.gesamtEigenkapital)} icon={PiggyBank} hint="über alle Objekte" />
+        <Stat
+          label="Gesamtwert (Marktwert)"
+          value={fmtEUR0(p.gesamtMarktwert)}
+          hint={`Kaufpreis: ${fmtEUR0(p.gesamtinvestition)}`}
+          icon={Home}
+        />
+        <Stat
+          label="Gesamte Restschuld"
+          value={fmtEUR0(p.gesamtRestschuld)}
+          icon={Landmark}
+          hint="alle Darlehen heute"
+        />
+        <Stat
+          label="Eingesetztes Eigenkapital"
+          value={fmtEUR0(p.gesamtEigenkapital)}
+          icon={PiggyBank}
+          hint="über alle Objekte"
+        />
         <Stat
           label="Gesamt-Cashflow / Monat"
           value={fmtEUR0(p.cashflowMonat)}
@@ -132,10 +157,32 @@ function Portfolio() {
           hint={`${fmtEUR0(p.cashflowMonat * 12)} / Jahr`}
           icon={Wallet}
         />
-        <Stat label="Ø Rendite" value={p.bruttorendite != null ? fmtPct(p.bruttorendite) : "—"} icon={TrendingUp} hint="Jahreskaltmiete über Kaufpreis" />
-        <Stat label="Vermietungsquote" value={p.vermietungsquote != null ? fmtPct(p.vermietungsquote) : "—"} icon={Percent} hint={`${p.vermietet}/${p.anzahl} vermietet`} />
-        <Stat label="Einnahmen / Monat" value={fmtEUR0(p.monatskaltmiete)} icon={ArrowUpRight} tone="pos" hint="Kaltmiete gesamt" />
-        <Stat label="Ausgaben / Monat" value={fmtEUR0(p.ausgabenMonat)} icon={ArrowDownRight} tone="neg" hint="Raten + lfd. Kosten" />
+        <Stat
+          label="Ø Rendite"
+          value={p.bruttorendite != null ? fmtPct(p.bruttorendite) : "—"}
+          icon={TrendingUp}
+          hint="Jahreskaltmiete über Kaufpreis"
+        />
+        <Stat
+          label="Vermietungsquote"
+          value={p.vermietungsquote != null ? fmtPct(p.vermietungsquote) : "—"}
+          icon={Percent}
+          hint={`${p.vermietet}/${p.anzahl} vermietet`}
+        />
+        <Stat
+          label="Einnahmen / Monat"
+          value={fmtEUR0(p.monatskaltmiete)}
+          icon={ArrowUpRight}
+          tone="pos"
+          hint="Kaltmiete gesamt"
+        />
+        <Stat
+          label="Ausgaben / Monat"
+          value={fmtEUR0(p.ausgabenMonat)}
+          icon={ArrowDownRight}
+          tone="neg"
+          hint="Raten + lfd. Kosten"
+        />
       </div>
 
       {/* Diagramme */}
@@ -159,7 +206,12 @@ function Portfolio() {
             { label: "Cashflow", value: p.cashflowMonat },
           ]}
         />
-        <DonutCard title="Marktwert nach Objekt" hint="Verteilung des Portfolios" data={investitionData} centerLabel="Gesamt" />
+        <DonutCard
+          title="Marktwert nach Objekt"
+          hint="Verteilung des Portfolios"
+          data={investitionData}
+          centerLabel="Gesamt"
+        />
       </div>
 
       <AreaCard
@@ -173,50 +225,71 @@ function Portfolio() {
       {/* Nach Objekt */}
       <div>
         <h2 className="mb-3 text-sm font-medium text-muted-foreground">Nach Objekt</h2>
-        <div className="overflow-x-auto rounded-2xl border bg-card">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="border-b text-xs text-muted-foreground">
-                <th className="p-3 text-left font-medium">Objekt</th>
-                <th className="p-3 text-right font-medium">Marktwert</th>
-                <th className="p-3 text-right font-medium">Restschuld</th>
-                <th className="p-3 text-right font-medium">Eigenkapital</th>
-                <th className="p-3 text-right font-medium">Cashflow/M.</th>
-                <th className="p-3 text-right font-medium">Rendite</th>
-                <th className="p-3 text-right font-medium">LTV</th>
-              </tr>
-            </thead>
-            <tbody>
-              {objekte.map((o) => {
-                const k = berechneKennzahlen(o);
-                const t = berechneTilgung(o);
-                const ek = k.marktwert - t.restschuld;
-                return (
-                  <tr key={o.id} className="border-b last:border-none hover:bg-accent/40">
-                    <td className="p-3">
-                      <Link to="/dashboard/objekte/$id" params={{ id: o.id }} className="font-medium hover:underline">
-                        {kurz(o)}
-                      </Link>
-                    </td>
-                    <td className="p-3 text-right tabular-nums">{fmtEUR0(k.marktwert)}</td>
-                    <td className="p-3 text-right tabular-nums">{t.gueltig ? fmtEUR0(t.restschuld) : "—"}</td>
-                    <td className="p-3 text-right tabular-nums">{fmtEUR0(ek)}</td>
-                    <td className={"p-3 text-right tabular-nums " + (k.cashflowMonat >= 0 ? "text-blue-600" : "text-destructive")}>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {objekte.map((o) => {
+            const k = berechneKennzahlen(o);
+            const t = berechneTilgung(o);
+            const ek = k.marktwert - t.restschuld;
+            return (
+              <Link
+                key={o.id}
+                to="/dashboard/objekte/$id"
+                params={{ id: o.id }}
+                className="group rounded-xl border bg-card p-4 transition hover:border-foreground/30"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ObjektIcon
+                    bilder={o.bilder}
+                    alt={o.adresse}
+                    className="h-9 w-9 shrink-0 overflow-hidden rounded-lg"
+                  />
+                  <div className="min-w-0 font-medium leading-tight">{kurz(o)}</div>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t pt-3 text-xs">
+                  <div>
+                    <dt className="text-muted-foreground">Marktwert</dt>
+                    <dd className="font-medium">{fmtEUR0(k.marktwert)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">Restschuld</dt>
+                    <dd className="font-medium">{t.gueltig ? fmtEUR0(t.restschuld) : "—"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">Eigenkapital</dt>
+                    <dd className="font-medium">{fmtEUR0(ek)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">Cashflow/Mon.</dt>
+                    <dd
+                      className={
+                        "font-medium " +
+                        (k.cashflowMonat >= 0 ? "text-blue-600" : "text-destructive")
+                      }
+                    >
                       {fmtEUR0(k.cashflowMonat)}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">{k.bruttorendite != null ? fmtPct(k.bruttorendite) : "—"}</td>
-                    <td className="p-3 text-right tabular-nums">{k.ltv != null ? fmtPct(k.ltv) : "—"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">Rendite</dt>
+                    <dd className="font-medium">
+                      {k.bruttorendite != null ? fmtPct(k.bruttorendite) : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">LTV</dt>
+                    <dd className="font-medium">{k.ltv != null ? fmtPct(k.ltv) : "—"}</dd>
+                  </div>
+                </dl>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Der Marktwert ist Ihre eigene Schätzung (im Objekt hinterlegbar); ohne Angabe wird der Kaufpreis verwendet.
-        Die Vermögensprognose nimmt einen gleichbleibenden Wert an und berücksichtigt keine Wertsteigerung.
+        Der Marktwert ist Ihre eigene Schätzung (im Objekt hinterlegbar); ohne Angabe wird der
+        Kaufpreis verwendet. Die Vermögensprognose nimmt einen gleichbleibenden Wert an und
+        berücksichtigt keine Wertsteigerung.
       </p>
     </div>
   );
