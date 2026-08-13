@@ -67,7 +67,12 @@ export function useBenachrichtigungen(): BenachrichtigungAnsicht[] {
         text: b.text,
         datum: b.erstelltAm,
         gelesen: b.gelesen,
-        link: b.objektId ? { to: "/dashboard/objekte/$id", params: { id: b.objektId } } : undefined,
+        link:
+          b.typ === "schaden"
+            ? { to: "/dashboard/maengel" }
+            : b.objektId
+              ? { to: "/dashboard/objekte/$id", params: { id: b.objektId } }
+              : undefined,
         markiereGelesen: () => markiereBenachrichtigungGelesen(b.id),
       });
     }

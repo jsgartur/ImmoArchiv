@@ -624,7 +624,7 @@ function AbrechnungEditor() {
               Parteien wird automatisch berechnet.
             </p>
 
-            <div className="hidden gap-2 px-1 pb-2 text-[11px] text-muted-foreground lg:grid lg:grid-cols-[1fr_1fr_120px_110px_170px_72px]">
+            <div className="hidden gap-3 px-1 pb-2 text-xs font-medium text-muted-foreground lg:grid lg:grid-cols-[1.2fr_1.2fr_140px_130px_190px_88px]">
               <span>Kostenart</span>
               <span>Hinweis</span>
               <span>Datum</span>
@@ -632,17 +632,17 @@ function AbrechnungEditor() {
               <span>Verteilerschlüssel</span>
               <span>Aktionen</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {positionen.map((pos, index) => (
                 <div
                   key={pos.id}
-                  className="grid gap-2 rounded-lg border p-2 lg:border-0 lg:p-0 lg:grid-cols-[1fr_1fr_120px_110px_170px_72px]"
+                  className="grid gap-3 rounded-lg border p-3 lg:border-0 lg:p-0 lg:grid-cols-[1.2fr_1.2fr_140px_130px_190px_88px]"
                 >
                   <Select
                     value={pos.bezeichnung}
                     onValueChange={(v) => setPosition(pos.id, { bezeichnung: v })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 text-[15px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -660,17 +660,20 @@ function AbrechnungEditor() {
                     value={pos.hinweis ?? ""}
                     onChange={(e) => setPosition(pos.id, { hinweis: e.target.value })}
                     placeholder="z. B. Belegnummer, Dienstleister"
+                    className="h-11 text-[15px]"
                   />
                   <Input
                     type="date"
                     value={pos.datum?.slice(0, 10) ?? ""}
                     onChange={(e) => setPosition(pos.id, { datum: e.target.value || undefined })}
+                    className="h-11 text-[15px]"
                   />
                   <Input
                     type="number"
                     step="0.01"
                     value={pos.betrag || ""}
                     onChange={(e) => setPosition(pos.id, { betrag: +e.target.value })}
+                    className="h-11 text-[15px]"
                   />
                   <Select
                     value={pos.schluessel}
@@ -678,7 +681,7 @@ function AbrechnungEditor() {
                       setPosition(pos.id, { schluessel: v as Umlageschluessel })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 text-[15px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

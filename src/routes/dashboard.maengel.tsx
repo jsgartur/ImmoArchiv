@@ -1,14 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Plus, Camera, X, Trash2, ChevronRight } from "lucide-react";
-import { useStore, fmtEUR, fmtDate, type Mangel, type MangelStatus, type Prioritaet } from "@/lib/store";
+import {
+  useStore,
+  fmtEUR,
+  fmtDate,
+  type Mangel,
+  type MangelStatus,
+  type Prioritaet,
+} from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { PageTabs, AUFGABEN_TABS } from "@/components/page-tabs";
@@ -51,7 +71,11 @@ function HandwerkerFeld({ value, onChange }: { value: string; onChange: (v: stri
       <Label>Handwerker (optional)</Label>
       {handwerker.length === 0 || frei ? (
         <>
-          <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Name eingeben" />
+          <Input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Name eingeben"
+          />
           {handwerker.length > 0 && (
             <button
               type="button"
@@ -63,8 +87,13 @@ function HandwerkerFeld({ value, onChange }: { value: string; onChange: (v: stri
           )}
         </>
       ) : (
-        <Select value={value || undefined} onValueChange={(v) => (v === FREI_TEXT_WERT ? setFrei(true) : onChange(v))}>
-          <SelectTrigger><SelectValue placeholder="Wählen…" /></SelectTrigger>
+        <Select
+          value={value || undefined}
+          onValueChange={(v) => (v === FREI_TEXT_WERT ? setFrei(true) : onChange(v))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Wählen…" />
+          </SelectTrigger>
           <SelectContent>
             {handwerker.map((h) => (
               <SelectItem key={h.id} value={h.name}>
@@ -101,18 +130,41 @@ function NeuerMangelDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><Plus className="h-4 w-4" /> Mangel erfassen</Button>
+        <Button>
+          <Plus className="h-4 w-4" /> Mangel erfassen
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Neuen Mangel erfassen</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Neuen Mangel erfassen</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
-          <div><Label>Titel</Label><Input placeholder="Wasserhahn Küche tropft" value={form.titel} onChange={(e) => setForm({ ...form, titel: e.target.value })} /></div>
-          <div><Label>Beschreibung</Label><Textarea rows={3} value={form.beschreibung} onChange={(e) => setForm({ ...form, beschreibung: e.target.value })} /></div>
+          <div>
+            <Label>Titel</Label>
+            <Input
+              placeholder="Wasserhahn Küche tropft"
+              value={form.titel}
+              onChange={(e) => setForm({ ...form, titel: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Beschreibung</Label>
+            <Textarea
+              rows={3}
+              value={form.beschreibung}
+              onChange={(e) => setForm({ ...form, beschreibung: e.target.value })}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Einheit</Label>
-              <Select value={form.einheitId} onValueChange={(v) => setForm({ ...form, einheitId: v })}>
-                <SelectTrigger><SelectValue placeholder="Einheit wählen" /></SelectTrigger>
+              <Select
+                value={form.einheitId}
+                onValueChange={(v) => setForm({ ...form, einheitId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Einheit wählen" />
+                </SelectTrigger>
                 <SelectContent>
                   {einheiten.map((e) => {
                     const o = objekte.find((x) => x.id === e.objektId);
@@ -127,8 +179,13 @@ function NeuerMangelDialog() {
             </div>
             <div>
               <Label>Priorität</Label>
-              <Select value={form.prioritaet} onValueChange={(v) => setForm({ ...form, prioritaet: v as Prioritaet })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.prioritaet}
+                onValueChange={(v) => setForm({ ...form, prioritaet: v as Prioritaet })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="niedrig">Niedrig</SelectItem>
                   <SelectItem value="mittel">Mittel</SelectItem>
@@ -140,17 +197,34 @@ function NeuerMangelDialog() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Gemeldet von</Label>
-              <Select value={form.gemeldetVon} onValueChange={(v) => setForm({ ...form, gemeldetVon: v as "mieter" | "vermieter" })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.gemeldetVon}
+                onValueChange={(v) =>
+                  setForm({ ...form, gemeldetVon: v as "mieter" | "vermieter" })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mieter">Mieter</SelectItem>
                   <SelectItem value="vermieter">Vermieter</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <HandwerkerFeld value={form.handwerker} onChange={(v) => setForm({ ...form, handwerker: v })} />
+            <HandwerkerFeld
+              value={form.handwerker}
+              onChange={(v) => setForm({ ...form, handwerker: v })}
+            />
           </div>
-          <div><Label>Geschätzte Kosten (€)</Label><Input type="number" value={form.kostenGeschaetzt || ""} onChange={(e) => setForm({ ...form, kostenGeschaetzt: +e.target.value })} /></div>
+          <div>
+            <Label>Geschätzte Kosten (€)</Label>
+            <Input
+              type="number"
+              value={form.kostenGeschaetzt || ""}
+              onChange={(e) => setForm({ ...form, kostenGeschaetzt: +e.target.value })}
+            />
+          </div>
 
           <div>
             <Label>Fotos</Label>
@@ -160,7 +234,9 @@ function NeuerMangelDialog() {
                   <img src={f} className="h-20 w-20 rounded-md object-cover" alt="" />
                   <button
                     type="button"
-                    onClick={() => setForm({ ...form, fotos: form.fotos.filter((_, j) => j !== i) })}
+                    onClick={() =>
+                      setForm({ ...form, fotos: form.fotos.filter((_, j) => j !== i) })
+                    }
                     className="absolute -right-1 -top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
                   >
                     <X className="h-3 w-3" />
@@ -207,7 +283,16 @@ function NeuerMangelDialog() {
                 status: "gemeldet",
               });
               setOpen(false);
-              setForm({ titel: "", beschreibung: "", einheitId: einheiten[0]?.id ?? "", prioritaet: "mittel", gemeldetVon: "vermieter", handwerker: "", kostenGeschaetzt: 0, fotos: [] });
+              setForm({
+                titel: "",
+                beschreibung: "",
+                einheitId: einheiten[0]?.id ?? "",
+                prioritaet: "mittel",
+                gemeldetVon: "vermieter",
+                handwerker: "",
+                kostenGeschaetzt: 0,
+                fotos: [],
+              });
             }}
           >
             Speichern
@@ -228,17 +313,67 @@ function MangelKarte({ m, onOpen }: { m: Mangel; onOpen: () => void }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="font-medium leading-tight">{m.titel}</div>
-        <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide", prioColor[m.prioritaet])}>
+        <span
+          className={cn(
+            "shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide",
+            prioColor[m.prioritaet],
+          )}
+        >
           {m.prioritaet}
         </span>
       </div>
       <div className="mt-1 text-xs text-muted-foreground">
         {objekt?.adresse.split(",")[0]} · {einheit?.bezeichnung}
       </div>
-      {m.fotos[0] && <img src={m.fotos[0]} className="mt-2 h-24 w-full rounded object-cover" alt="" />}
+      {m.fotos[0] && (
+        <img src={m.fotos[0]} className="mt-2 h-24 w-full rounded object-cover" alt="" />
+      )}
       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
         <span>{fmtDate(m.gemeldetAm)}</span>
         <ChevronRight className="h-3.5 w-3.5" />
+      </div>
+    </button>
+  );
+}
+
+function MieterMangelZeile({ m, onOpen }: { m: Mangel; onOpen: () => void }) {
+  const einheit = useStore((s) => s.einheiten.find((e) => e.id === m.einheitId));
+  const objekt = useStore((s) => s.objekte.find((o) => o.id === einheit?.objektId));
+  const mieter = useStore(
+    (s) =>
+      s.mieter.find((x) => x.einheitId === m.einheitId && !x.mietende) ??
+      s.mieter.find((x) => x.einheitId === m.einheitId),
+  );
+  const statusLabel = spalten.find((sp) => sp.key === m.status)?.label ?? m.status;
+
+  return (
+    <button
+      onClick={onOpen}
+      className="flex w-full items-center justify-between gap-3 rounded-lg border bg-card p-3 text-left transition hover:border-foreground/30"
+    >
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide",
+              prioColor[m.prioritaet],
+            )}
+          >
+            {m.prioritaet}
+          </span>
+          <span className="truncate font-medium">{m.titel}</span>
+        </div>
+        <div className="mt-1 truncate text-xs text-muted-foreground">
+          {objekt?.strasse || objekt?.adresse.split(",")[0]} · {einheit?.bezeichnung}
+          {mieter ? ` · ${mieter.name}` : ""}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        <Badge variant="outline" className="text-[10px]">
+          {statusLabel}
+        </Badge>
+        <span className="text-xs text-muted-foreground">{fmtDate(m.gemeldetAm)}</span>
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
     </button>
   );
@@ -260,26 +395,38 @@ function MangelSheet({ id, onClose }: { id: string | null; onClose: () => void }
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader><SheetTitle>{m.titel}</SheetTitle></SheetHeader>
+        <SheetHeader>
+          <SheetTitle>{m.titel}</SheetTitle>
+        </SheetHeader>
         <div className="mt-4 space-y-4 px-4 pb-6">
           <div className="text-sm text-muted-foreground">
             {objekt?.adresse} · {einheit?.bezeichnung}
           </div>
           <div className="flex flex-wrap gap-2">
-            <span className={cn("rounded-full px-2 py-0.5 text-xs uppercase", prioColor[m.prioritaet])}>{m.prioritaet}</span>
-            <Badge variant="outline">Von {m.gemeldetVon === "mieter" ? "Mieter" : "Vermieter"}</Badge>
+            <span
+              className={cn("rounded-full px-2 py-0.5 text-xs uppercase", prioColor[m.prioritaet])}
+            >
+              {m.prioritaet}
+            </span>
+            <Badge variant="outline">
+              Von {m.gemeldetVon === "mieter" ? "Mieter" : "Vermieter"}
+            </Badge>
           </div>
           {m.beschreibung && <p className="text-sm">{m.beschreibung}</p>}
           {m.fotos.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
-              {m.fotos.map((f, i) => <img key={i} src={f} className="aspect-square rounded object-cover" alt="" />)}
+              {m.fotos.map((f, i) => (
+                <img key={i} src={f} className="aspect-square rounded object-cover" alt="" />
+              ))}
             </div>
           )}
 
           <div>
             <Label className="mb-1">Status</Label>
             <Select value={m.status} onValueChange={(v) => setStatus(m.id, v as MangelStatus)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="gemeldet">Gemeldet</SelectItem>
                 <SelectItem value="in_bearbeitung">In Bearbeitung</SelectItem>
@@ -298,28 +445,45 @@ function MangelSheet({ id, onClose }: { id: string | null; onClose: () => void }
               <Input
                 type="number"
                 defaultValue={m.kostenTatsaechlich ?? ""}
-                onBlur={(e) => updateMangel(m.id, { kostenTatsaechlich: e.target.value ? +e.target.value : undefined })}
+                onBlur={(e) =>
+                  updateMangel(m.id, {
+                    kostenTatsaechlich: e.target.value ? +e.target.value : undefined,
+                  })
+                }
               />
             </div>
           </div>
-          {m.kostenGeschaetzt && <div className="text-xs text-muted-foreground">Geschätzt: {fmtEUR(m.kostenGeschaetzt)}</div>}
+          {m.kostenGeschaetzt && (
+            <div className="text-xs text-muted-foreground">
+              Geschätzt: {fmtEUR(m.kostenGeschaetzt)}
+            </div>
+          )}
 
           <div>
             <Label className="mb-1">Verlauf</Label>
             <ol className="space-y-2 border-l pl-3">
               {m.verlauf.map((v, i) => (
                 <li key={i} className="text-sm">
-                  <div className="text-xs text-muted-foreground">{new Date(v.datum).toLocaleString("de-DE")}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(v.datum).toLocaleString("de-DE")}
+                  </div>
                   {v.text}
                 </li>
               ))}
             </ol>
             <div className="mt-2 flex gap-2">
-              <Input placeholder="Notiz hinzufügen…" value={notiz} onChange={(e) => setNotiz(e.target.value)} />
+              <Input
+                placeholder="Notiz hinzufügen…"
+                value={notiz}
+                onChange={(e) => setNotiz(e.target.value)}
+              />
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (notiz.trim()) { addNotiz(m.id, notiz.trim()); setNotiz(""); }
+                  if (notiz.trim()) {
+                    addNotiz(m.id, notiz.trim());
+                    setNotiz("");
+                  }
                 }}
               >
                 Hinzufügen
@@ -331,7 +495,10 @@ function MangelSheet({ id, onClose }: { id: string | null; onClose: () => void }
             variant="ghost"
             className="text-destructive hover:text-destructive"
             onClick={() => {
-              if (confirm("Mangel löschen?")) { removeMangel(m.id); onClose(); }
+              if (confirm("Mangel löschen?")) {
+                removeMangel(m.id);
+                onClose();
+              }
             }}
           >
             <Trash2 className="h-4 w-4" /> Mangel löschen
@@ -362,6 +529,15 @@ function Maengel() {
     });
   }, [maengel, filterObjekt, filterPrio, einheiten]);
 
+  const vonMieternGemeldet = useMemo(
+    () =>
+      gefiltert
+        .filter((m) => m.gemeldetVon === "mieter")
+        .slice()
+        .sort((a, b) => b.gemeldetAm.localeCompare(a.gemeldetAm)),
+    [gefiltert],
+  );
+
   if (!maengelGeladen) {
     return <LadeSkeleton titel="Mängel" text="Erfassen, verfolgen, dokumentieren." />;
   }
@@ -379,14 +555,22 @@ function Maengel() {
 
       <div className="flex flex-wrap gap-2">
         <Select value={filterObjekt} onValueChange={setFilterObjekt}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="alle">Alle Objekte</SelectItem>
-            {objekte.map((o) => <SelectItem key={o.id} value={o.id}>{o.adresse.split(",")[0]}</SelectItem>)}
+            {objekte.map((o) => (
+              <SelectItem key={o.id} value={o.id}>
+                {o.adresse.split(",")[0]}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={filterPrio} onValueChange={setFilterPrio}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="alle">Alle Prioritäten</SelectItem>
             <SelectItem value="niedrig">Niedrig</SelectItem>
@@ -395,6 +579,19 @@ function Maengel() {
           </SelectContent>
         </Select>
       </div>
+
+      {vonMieternGemeldet.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+            Von Mietern gemeldete Mängel
+          </h2>
+          <div className="space-y-2">
+            {vonMieternGemeldet.map((m) => (
+              <MieterMangelZeile key={m.id} m={m} onOpen={() => setOpenId(m.id)} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         {spalten.map((sp) => {
