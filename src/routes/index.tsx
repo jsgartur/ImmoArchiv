@@ -25,6 +25,7 @@ import { SparklesCore } from "@/components/ui/sparkles";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PLAENE, monatspreis, JAHRES_RABATT } from "@/lib/plaene";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -322,6 +323,7 @@ function Landing() {
 
       {/* Für wen */}
       <section className="border-t border-border/60 bg-card/30">
+        <ScrollReveal>
         <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="mx-auto mb-12 max-w-xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Gemacht für Ihren Alltag.</h2>
@@ -380,10 +382,12 @@ function Landing() {
             ))}
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Module */}
       <section id="module" className="border-t border-border/60 bg-background">
+        <ScrollReveal>
         <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="mb-12 max-w-2xl">
             <p className="text-sm font-medium text-blue-600">Drei Module</p>
@@ -411,10 +415,12 @@ function Landing() {
             </ModuleCard>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Warum */}
       <section id="warum" className="border-t border-border/60 bg-card/30">
+        <ScrollReveal>
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:grid-cols-2">
           <div>
             <p className="text-sm font-medium text-blue-600">Warum ImmoArchiv</p>
@@ -443,10 +449,12 @@ function Landing() {
             ))}
           </ul>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Vergleich */}
       <section className="border-t border-border/60">
+        <ScrollReveal>
         <div className="mx-auto max-w-4xl px-4 py-20">
           <div className="mb-10 text-center">
             <p className="text-sm font-medium text-blue-600">Überzeugend</p>
@@ -491,10 +499,12 @@ function Landing() {
             </Button>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Feature strip */}
       <section className="border-t border-border/60">
+        <ScrollReveal>
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-3">
           {[
             { icon: Smartphone, t: "Mobile-first", d: "Bedienung auf dem Handy genauso wie am Desktop." },
@@ -510,10 +520,12 @@ function Landing() {
             </div>
           ))}
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Sicherheit */}
       <section className="border-t border-border/60 bg-card/30">
+        <ScrollReveal>
         <div className="mx-auto max-w-6xl px-4 py-16">
           <div className="mx-auto mb-8 max-w-xl text-center">
             <p className="text-sm font-medium text-blue-600">Sicherheit</p>
@@ -536,10 +548,12 @@ function Landing() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* So funktioniert's */}
       <section id="so-funktionierts" className="border-t border-border/60 bg-card/30">
+        <ScrollReveal>
         <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="mx-auto mb-10 max-w-2xl text-center">
             <p className="text-sm font-medium text-blue-600">So funktioniert's</p>
@@ -552,10 +566,12 @@ function Landing() {
           </div>
           <RadialOrbitalTimeline timelineData={SO_FUNKTIONIERT} />
         </div>
+        </ScrollReveal>
       </section>
 
       {/* Preise */}
       <section id="preise" className="border-t border-border/60 bg-card/30">
+        <ScrollReveal>
         <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <p className="text-sm font-medium text-blue-600">Preise</p>
@@ -568,7 +584,7 @@ function Landing() {
             </p>
           </div>
 
-          <div className="grid items-stretch gap-6 lg:grid-cols-3">
+          <div className="mx-auto grid max-w-3xl items-stretch gap-6 sm:grid-cols-2">
             {PLAENE.map((plan) => (
               <div
                 key={plan.id}
@@ -608,10 +624,12 @@ function Landing() {
             Bezahlte Pläne sind aktuell in Vorbereitung – bis dahin sind alle Funktionen kostenlos nutzbar.
           </p>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* FAQ */}
       <section id="faq" className="border-t border-border/60">
+        <ScrollReveal>
         <div className="mx-auto max-w-3xl px-4 py-20">
           <div className="mb-10 text-center">
             <p className="text-sm font-medium text-blue-600">Häufige Fragen</p>
@@ -626,10 +644,12 @@ function Landing() {
             ))}
           </Accordion>
         </div>
+        </ScrollReveal>
       </section>
 
       {/* CTA */}
       <section className="border-t border-border/60">
+        <ScrollReveal>
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
             Bereit, die Zettel zu ersetzen?
@@ -645,6 +665,7 @@ function Landing() {
             </Button>
           </div>
         </div>
+        </ScrollReveal>
       </section>
 
       <footer id="dsgvo" className="border-t border-border/60 bg-background">

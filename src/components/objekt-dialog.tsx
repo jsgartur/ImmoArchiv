@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Building2, Building, Home, Store, Car, KeyRound, ArrowLeft, ArrowRight, Check, ImagePlus } from "lucide-react";
 import { ladeBilderHoch } from "@/lib/bild-utils";
 import { ObjektBild } from "@/components/objekt-bild";
+import { Stepper } from "@/components/stepper";
 import { toast } from "sonner";
 import {
   useStore,
@@ -51,6 +52,7 @@ const TYP_REIHENFOLGE: Objekttyp[] = [
 ];
 
 const SCHRITTE = ["Typ", "Adresse", "Kaufdaten", "Finanzierung", "Vermietung"] as const;
+const STEPPER_SCHRITTE = SCHRITTE.map((s) => ({ id: s, label: s }));
 
 function NumField({
   label,
@@ -247,20 +249,7 @@ export function ObjektDialog({
         )}
 
         {/* Fortschritt */}
-        {schritt > 0 && (
-          <div className="flex items-center gap-1.5">
-            {SCHRITTE.map((s, i) => (
-              <div key={s} className="flex flex-1 items-center gap-1.5">
-                <div
-                  className={cn(
-                    "h-1.5 flex-1 rounded-full transition",
-                    i <= schritt ? "bg-primary" : "bg-muted",
-                  )}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        {schritt > 0 && <Stepper schritte={STEPPER_SCHRITTE} aktiv={SCHRITTE[schritt]} />}
 
         {/* SCHRITT 1: Typ-Auswahl */}
         {schritt === 0 && (

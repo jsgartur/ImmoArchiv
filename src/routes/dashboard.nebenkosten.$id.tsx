@@ -17,6 +17,7 @@ import {
   CalendarRange,
 } from "lucide-react";
 import { erzeugeNkPdf } from "@/lib/nk-pdf";
+import { Stepper as SchrittLeiste } from "@/components/stepper";
 import {
   useStore,
   fmtEUR,
@@ -170,46 +171,6 @@ const SCHRITTE: { id: Schritt; label: string }[] = [
   { id: "kosten", label: "Kostenaufstellung" },
   { id: "abschluss", label: "Prüfung & Abschluss" },
 ];
-
-function Stepper({ aktiv, onSelect }: { aktiv: Schritt; onSelect: (s: Schritt) => void }) {
-  const idx = SCHRITTE.findIndex((s) => s.id === aktiv);
-  return (
-    <div className="no-print flex items-start">
-      {SCHRITTE.map((s, i) => (
-        <div key={s.id} className={cn("flex items-center", i < SCHRITTE.length - 1 && "flex-1")}>
-          <button
-            onClick={() => onSelect(s.id)}
-            className="flex shrink-0 flex-col items-center gap-1.5"
-          >
-            <span
-              className={cn(
-                "grid h-7 w-7 place-items-center rounded-full border-2 text-xs font-medium transition",
-                i < idx
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : i === idx
-                    ? "border-primary text-primary"
-                    : "border-muted-foreground/30 text-muted-foreground",
-              )}
-            >
-              {i < idx ? <Check className="h-3.5 w-3.5" /> : i + 1}
-            </span>
-            <span
-              className={cn(
-                "max-w-24 text-center text-[11px] leading-tight",
-                i === idx ? "font-medium text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {s.label}
-            </span>
-          </button>
-          {i < SCHRITTE.length - 1 && (
-            <div className={cn("mx-1 mt-3.5 h-0.5 flex-1", i < idx ? "bg-primary" : "bg-border")} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function AbrechnungEditor() {
   const { id } = Route.useParams();
@@ -377,7 +338,7 @@ function AbrechnungEditor() {
       </div>
 
       <div className="no-print rounded-2xl border bg-card p-5">
-        <Stepper aktiv={schritt} onSelect={setSchritt} />
+        <SchrittLeiste schritte={SCHRITTE} aktiv={schritt} onSelect={setSchritt} />
       </div>
 
       {/* Schritt 1: Anlage */}

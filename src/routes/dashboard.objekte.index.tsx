@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ObjektDialog } from "@/components/objekt-dialog";
 import { ObjektBild } from "@/components/objekt-bild";
 import { LadeSkeleton } from "@/components/lade-skeleton";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 export const Route = createFileRoute("/dashboard/objekte/")({
   component: ObjekteListe,
@@ -46,7 +47,7 @@ function ObjekteListe() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <ScrollReveal className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {objekte.map((o) => {
             const k = berechneKennzahlen(o);
             const anzahlEinheiten = einheiten.filter((e) => e.objektId === o.id).length;
@@ -109,7 +110,7 @@ function ObjekteListe() {
               </Link>
             );
           })}
-        </div>
+        </ScrollReveal>
       )}
     </div>
   );
