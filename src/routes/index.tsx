@@ -214,7 +214,7 @@ function Landing() {
             className="h-full w-full"
           />
         </div>
-        <div className="relative z-10 mx-auto max-w-4xl px-4 pt-20 pb-24 text-center md:pt-28 md:pb-32">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 pt-20 pb-24 md:grid-cols-[1fr_1.15fr] md:pt-28 md:pb-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -222,23 +222,31 @@ function Landing() {
           >
             <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-              Für 1–15 Wohneinheiten. Ohne Hausverwaltungs-Overhead.
+              Für Vermieter und kleine Hausverwaltungen
             </span>
-            <h1 className="mt-6 flex flex-col items-center text-4xl font-semibold tracking-tight md:text-6xl">
-              <span>
-                Ihre <RotierendesWort />
-              </span>
-              <span className="text-muted-foreground">im Griff. Ohne Zettelwirtschaft.</span>
+            <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
+              Software für die Immobilienverwaltung, gemacht für <RotierendesWort />
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground md:text-lg">
-              ImmoArchiv bündelt Objekt- und Mieterverwaltung, Mängel-Dokumentation und einen
-              nachvollziehbaren Mietanpassungs-Rechner in einer schlanken App — gemacht für private
-              Vermieter, nicht für Hausverwaltungen mit 500 Einheiten.
+            <p className="mt-6 max-w-xl text-base text-muted-foreground md:text-lg">
+              Ob 1 Wohnung oder 15 Einheiten — ImmoArchiv bündelt Objekt- und Mieterverwaltung,
+              Nebenkostenabrechnung, Mängel-Dokumentation und Mieterportal an einem Ort.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <ul className="mt-6 space-y-2.5 text-sm">
+              {[
+                "Nebenkostenabrechnung in Minuten statt Stunden",
+                "Mieten, Belege und Dokumente an einem Ort",
+                "Mieterportal inklusive — für weniger Anrufe und E-Mails",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2.5">
+                  <Check className="h-4 w-4 shrink-0 text-blue-600" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/dashboard">
-                  Jetzt starten <ArrowRight className="ml-1 h-4 w-4" />
+                  Jetzt kostenlos starten <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -246,7 +254,7 @@ function Landing() {
               </Button>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              Kostenloses Konto in 30 Sekunden. Keine Kreditkarte nötig.
+              Unverbindlich testen. Keine Kreditkarte nötig.
             </p>
           </motion.div>
 
@@ -255,7 +263,7 @@ function Landing() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="mx-auto mt-14 max-w-5xl"
+            className="mx-auto w-full max-w-lg md:max-w-none"
           >
             <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-blue-900/10">
               {/* Fensterleiste */}
@@ -309,6 +317,68 @@ function Landing() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Für wen */}
+      <section className="border-t border-border/60 bg-card/30">
+        <div className="mx-auto max-w-6xl px-4 py-20">
+          <div className="mx-auto mb-12 max-w-xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Gemacht für Ihren Alltag.</h2>
+            <p className="mt-3 text-muted-foreground">
+              Ob privater Vermieter oder kleines Unternehmen — Sie bekommen genau die Werkzeuge,
+              die Sie für Ihre Verwaltung brauchen.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {[
+              {
+                tag: "Wenige Objekte, privat vermietet",
+                title: "Für Privatvermieter",
+                icon: Home,
+                gradient: "from-blue-600/25 via-blue-500/10 to-transparent",
+                punkte: [
+                  ["Mieten im Blick behalten", "Wer hat gezahlt, wer nicht? Sofort sichtbar."],
+                  ["Nebenkosten ohne Aufwand", "Abrechnung in Minuten statt Excel-Formeln."],
+                  ["Dokumente wiederfinden", "Kein Suchen mehr in Ordnern oder E-Mails."],
+                ],
+              },
+              {
+                tag: "Mehrere Objekte, im Team verwaltet",
+                title: "Für Unternehmen",
+                icon: Building2,
+                gradient: "from-violet-600/25 via-violet-500/10 to-transparent",
+                punkte: [
+                  ["Im Team zusammenarbeiten", "Team-Mitglieder einladen, gemeinsam verwalten."],
+                  ["Skalierbar verwalten", "Beliebig viele Objekte, ein Konto."],
+                  ["Klarheit für Eigentümer", "Alle Kennzahlen jederzeit abrufbar."],
+                ],
+              },
+            ].map((k) => (
+              <div key={k.title} className="overflow-hidden rounded-2xl border bg-card">
+                <div className={`relative h-40 bg-gradient-to-br ${k.gradient} flex items-center justify-center`}>
+                  <k.icon className="h-16 w-16 text-blue-600/70" strokeWidth={1.25} />
+                </div>
+                <div className="p-6">
+                  <p className="text-xs font-medium text-blue-600">{k.tag}</p>
+                  <h3 className="mt-1 flex items-center gap-2 text-lg font-semibold">
+                    <k.icon className="h-5 w-5" /> {k.title}
+                  </h3>
+                  <ul className="mt-4 space-y-3 text-sm">
+                    {k.punkte.map(([t, d]) => (
+                      <li key={t} className="flex items-start gap-2.5">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                        <div>
+                          <div className="font-medium">{t}</div>
+                          <div className="text-muted-foreground">{d}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -372,6 +442,54 @@ function Landing() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Vergleich */}
+      <section className="border-t border-border/60">
+        <div className="mx-auto max-w-4xl px-4 py-20">
+          <div className="mb-10 text-center">
+            <p className="text-sm font-medium text-blue-600">Überzeugend</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+              ImmoArchiv im Vergleich zur Excel-Tabelle.
+            </h2>
+          </div>
+          <div className="overflow-hidden rounded-2xl border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-card/60">
+                  <th className="p-4 text-left font-medium text-muted-foreground">Kriterium</th>
+                  <th className="w-32 bg-blue-600/10 p-4 text-center font-semibold">ImmoArchiv</th>
+                  <th className="w-32 p-4 text-center font-medium text-muted-foreground">Excel</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  "Nebenkostenabrechnung in Minuten",
+                  "Automatische Rendite-/Cashflow-Kennzahlen",
+                  "Mieteingänge auf einen Blick",
+                  "Mieterportal inklusive",
+                  "Zentrale Dokumentenablage",
+                  "Von überall erreichbar (Cloud)",
+                ].map((z, i) => (
+                  <tr key={z} className={i % 2 ? "bg-card/30" : undefined}>
+                    <td className="border-t p-4">{z}</td>
+                    <td className="border-t bg-blue-600/10 p-4 text-center">
+                      <Check className="mx-auto h-4 w-4 text-blue-600" />
+                    </td>
+                    <td className="border-t p-4 text-center text-muted-foreground">✕</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-8 flex justify-center">
+            <Button asChild size="lg">
+              <Link to="/dashboard">
+                Jetzt kostenlos starten <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -530,15 +648,42 @@ function Landing() {
       </section>
 
       <footer id="dsgvo" className="border-t border-border/60 bg-background">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <a href="#preise" className="hover:text-foreground">Preise</a>
-            <a href="#faq" className="hover:text-foreground">FAQ</a>
-            <a href="#zahlungsmethoden" className="hover:text-foreground">Zahlungsmethoden</a>
-            <Link to="/impressum" className="hover:text-foreground">Impressum</Link>
-            <Link to="/datenschutz" className="hover:text-foreground">Datenschutzerklärung</Link>
-            <Link to="/avv" className="hover:text-foreground">AVV</Link>
-            <Link to="/agb" className="hover:text-foreground">AGB</Link>
+        <div className="mx-auto max-w-6xl px-4 py-14">
+          <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
+            <div>
+              <Link to="/" className="flex items-center gap-2 font-semibold">
+                <Logo className="h-7 w-7" />
+                ImmoArchiv
+              </Link>
+              <p className="mt-3 max-w-[22ch] text-xs text-muted-foreground">
+                Vermieter-Software für 1–15 Wohneinheiten. Made in Germany.
+              </p>
+            </div>
+            <div className="text-sm">
+              <div className="mb-3 font-medium">Produkt</div>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><a href="#module" className="hover:text-foreground">Module</a></li>
+                <li><a href="#so-funktionierts" className="hover:text-foreground">So funktioniert's</a></li>
+                <li><a href="#preise" className="hover:text-foreground">Preise</a></li>
+                <li><a href="#faq" className="hover:text-foreground">FAQ</a></li>
+              </ul>
+            </div>
+            <div className="text-sm">
+              <div className="mb-3 font-medium">Rechtliches</div>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><Link to="/impressum" className="hover:text-foreground">Impressum</Link></li>
+                <li><Link to="/datenschutz" className="hover:text-foreground">Datenschutzerklärung</Link></li>
+                <li><Link to="/avv" className="hover:text-foreground">AVV</Link></li>
+                <li><Link to="/agb" className="hover:text-foreground">AGB</Link></li>
+              </ul>
+            </div>
+            <div className="text-sm">
+              <div className="mb-3 font-medium">Konto</div>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><Link to="/login" className="hover:text-foreground">Anmelden</Link></li>
+                <li><Link to="/dashboard" className="hover:text-foreground">Jetzt kostenlos starten</Link></li>
+              </ul>
+            </div>
           </div>
 
           {/* Zahlungsmethoden (Stripe, in Vorbereitung) */}
