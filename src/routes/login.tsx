@@ -70,10 +70,13 @@ function LoginPage() {
           setBusy(false);
           return;
         }
-        const { error } = await signUp(email, passwort, { vorname, nachname, geburtsdatum, kontotyp, firma });
+        const { error, hatSession } = await signUp(email, passwort, { vorname, nachname, geburtsdatum, kontotyp, firma });
         if (error) setFehler(error);
-        else {
-          setHinweis("Konto erstellt! Falls Bestätigung nötig ist, prüfen Sie Ihr E-Mail-Postfach.");
+        else if (hatSession) {
+          toast.success("Registrierung erfolgreich");
+          navigate({ to: redirect || "/dashboard" });
+        } else {
+          setHinweis("Konto erstellt! Bitte bestätigen Sie Ihre E-Mail-Adresse, um sich anzumelden.");
           toast.success("Registrierung erfolgreich");
         }
       } else {

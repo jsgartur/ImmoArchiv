@@ -15,7 +15,7 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, daten: RegistrierungsDaten) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, daten: RegistrierungsDaten) => Promise<{ error: string | null; hatSession: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   resendConfirmation: (email: string) => Promise<{ error: string | null }>;
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp: AuthContextValue["signUp"] = async (email, password, daten) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
-    return { error: error ? uebersetzeFehler(error.message) : null };
+    return { error: error ? uebersetzeFehler(error.message) : null, hatSession: !!data.session };
   };
 
   const resendConfirmation: AuthContextValue["resendConfirmation"] = async (email) => {
