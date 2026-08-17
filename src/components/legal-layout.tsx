@@ -29,6 +29,7 @@ export function LegalLayout({ title, children }: { title: string; children: Reac
           <Link to="/datenschutz" className="text-muted-foreground hover:text-foreground">Datenschutzerklärung</Link>
           <Link to="/avv" className="text-muted-foreground hover:text-foreground">AVV</Link>
           <Link to="/agb" className="text-muted-foreground hover:text-foreground">AGB</Link>
+          <Link to="/kuendigen" className="text-muted-foreground hover:text-foreground">Vertrag kündigen</Link>
         </div>
       </main>
     </div>

@@ -47,9 +47,9 @@ function Agb() {
         <p>
           Kostenpflichtige Pläne verlängern sich automatisch um den gewählten Abrechnungszeitraum (monatlich oder
           jährlich), sofern sie nicht vor Ablauf gekündigt werden. Die Kündigung ist jederzeit zum Ende des
-          laufenden Abrechnungszeitraums über das Kundenportal (Konto-Seite → „Zahlung verwalten") möglich. Der
-          Starter-Plan sowie das Nutzerkonto insgesamt können jederzeit über die Konto-Seite
-          („Konto unwiderruflich löschen") beendet werden.
+          laufenden Abrechnungszeitraums über die Kündigungsseite (immoarchiv.com/kuendigen) oder über das
+          Kundenportal (Konto-Seite → „Zahlung verwalten") möglich. Der Starter-Plan sowie das Nutzerkonto
+          insgesamt können jederzeit über die Konto-Seite („Konto unwiderruflich löschen") beendet werden.
         </p>
       </LegalSection>
 

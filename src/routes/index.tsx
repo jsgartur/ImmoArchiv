@@ -695,6 +695,7 @@ function Landing() {
                 <li><Link to="/impressum" className="hover:text-foreground">Impressum</Link></li>
                 <li><Link to="/datenschutz" className="hover:text-foreground">Datenschutzerklärung</Link></li>
                 <li><Link to="/avv" className="hover:text-foreground">AVV</Link></li>
+                <li><Link to="/kuendigen" className="hover:text-foreground">Vertrag kündigen</Link></li>
                 <li><Link to="/agb" className="hover:text-foreground">AGB</Link></li>
               </ul>
             </div>

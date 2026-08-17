@@ -183,6 +183,9 @@ function DashboardLayout() {
           <Link to="/agb" onClick={onNavigate} className="hover:text-foreground">
             AGB
           </Link>
+          <Link to="/kuendigen" onClick={onNavigate} className="hover:text-foreground">
+            Kündigen
+          </Link>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as KuendigenRouteImport } from './routes/kuendigen'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as EmailBestaetigtRouteImport } from './routes/email-bestaetigt'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
@@ -48,6 +49,11 @@ const PortalRoute = PortalRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KuendigenRoute = KuendigenRouteImport.update({
+  id: '/kuendigen',
+  path: '/kuendigen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImpressumRoute = ImpressumRouteImport.update({
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/datenschutz': typeof DatenschutzRoute
   '/email-bestaetigt': typeof EmailBestaetigtRoute
   '/impressum': typeof ImpressumRoute
+  '/kuendigen': typeof KuendigenRoute
   '/login': typeof LoginRoute
   '/portal': typeof PortalRoute
   '/dashboard/account': typeof DashboardAccountRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/datenschutz': typeof DatenschutzRoute
   '/email-bestaetigt': typeof EmailBestaetigtRoute
   '/impressum': typeof ImpressumRoute
+  '/kuendigen': typeof KuendigenRoute
   '/login': typeof LoginRoute
   '/portal': typeof PortalRoute
   '/dashboard/account': typeof DashboardAccountRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/datenschutz': typeof DatenschutzRoute
   '/email-bestaetigt': typeof EmailBestaetigtRoute
   '/impressum': typeof ImpressumRoute
+  '/kuendigen': typeof KuendigenRoute
   '/login': typeof LoginRoute
   '/portal': typeof PortalRoute
   '/dashboard/account': typeof DashboardAccountRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/email-bestaetigt'
     | '/impressum'
+    | '/kuendigen'
     | '/login'
     | '/portal'
     | '/dashboard/account'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/email-bestaetigt'
     | '/impressum'
+    | '/kuendigen'
     | '/login'
     | '/portal'
     | '/dashboard/account'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/email-bestaetigt'
     | '/impressum'
+    | '/kuendigen'
     | '/login'
     | '/portal'
     | '/dashboard/account'
@@ -393,6 +405,7 @@ export interface RootRouteChildren {
   DatenschutzRoute: typeof DatenschutzRoute
   EmailBestaetigtRoute: typeof EmailBestaetigtRoute
   ImpressumRoute: typeof ImpressumRoute
+  KuendigenRoute: typeof KuendigenRoute
   LoginRoute: typeof LoginRoute
   PortalRoute: typeof PortalRoute
 }
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kuendigen': {
+      id: '/kuendigen'
+      path: '/kuendigen'
+      fullPath: '/kuendigen'
+      preLoaderRoute: typeof KuendigenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impressum': {
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   DatenschutzRoute: DatenschutzRoute,
   EmailBestaetigtRoute: EmailBestaetigtRoute,
   ImpressumRoute: ImpressumRoute,
+  KuendigenRoute: KuendigenRoute,
   LoginRoute: LoginRoute,
   PortalRoute: PortalRoute,
 }
