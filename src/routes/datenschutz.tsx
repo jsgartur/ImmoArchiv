@@ -40,7 +40,8 @@ function Datenschutz() {
 
       <LegalSection heading="3. Registrierung und Nutzerkonto">
         <p>
-          Bei der Registrierung erheben wir Vorname, Nachname, Geburtsdatum, E-Mail-Adresse und ein von Ihnen
+          Bei der Registrierung erheben wir Vorname, Nachname, Kontotyp (Privatvermieter/Unternehmen, ggf. Firma),
+          E-Mail-Adresse und ein von Ihnen
           gewähltes Passwort (dieses wird von unserem Auth-Anbieter ausschließlich verschlüsselt/gehasht
           gespeichert, niemals im Klartext). Rechtsgrundlage ist die Erfüllung des Nutzungsvertrags
           (Art. 6 Abs. 1 lit. b DSGVO). Zur Bestätigung Ihrer E-Mail-Adresse versenden wir eine automatische

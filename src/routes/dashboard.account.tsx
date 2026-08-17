@@ -381,12 +381,6 @@ function Account() {
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Feld
-              label="Geburtsdatum"
-              type="date"
-              value={form.geburtsdatum}
-              onChange={(v) => set("geburtsdatum", v)}
-            />
             <div>
               <Label className="text-xs">Kontotyp</Label>
               <Select

@@ -31,7 +31,6 @@ function LoginPage() {
   const [passwortWiederholen, setPasswortWiederholen] = useState("");
   const [vorname, setVorname] = useState("");
   const [nachname, setNachname] = useState("");
-  const [geburtsdatum, setGeburtsdatum] = useState("");
   const [kontotyp, setKontotyp] = useState<"privat" | "unternehmen">("privat");
   const [firma, setFirma] = useState("");
   const [busy, setBusy] = useState(false);
@@ -70,7 +69,7 @@ function LoginPage() {
           setBusy(false);
           return;
         }
-        const { error, hatSession } = await signUp(email, passwort, { vorname, nachname, geburtsdatum, kontotyp, firma });
+        const { error, hatSession } = await signUp(email, passwort, { vorname, nachname, kontotyp, firma });
         if (error) setFehler(error);
         else if (hatSession) {
           toast.success("Registrierung erfolgreich");
@@ -192,18 +191,6 @@ function LoginPage() {
               </div>
             )}
 
-            {modus === "registrieren" && (
-              <div>
-                <Label className="text-xs">Geburtsdatum</Label>
-                <Input
-                  type="date"
-                  autoComplete="bday"
-                  required
-                  value={geburtsdatum}
-                  onChange={(e) => setGeburtsdatum(e.target.value)}
-                />
-              </div>
-            )}
 
             <div>
               <Label className="text-xs">E-Mail</Label>

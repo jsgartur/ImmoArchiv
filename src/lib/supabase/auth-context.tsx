@@ -5,7 +5,6 @@ import { supabase } from "./client";
 export interface RegistrierungsDaten {
   vorname: string;
   nachname: string;
-  geburtsdatum?: string; // ISO (YYYY-MM-DD)
   kontotyp: "privat" | "unternehmen";
   firma?: string;
 }
@@ -68,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           vorname: daten.vorname,
           nachname: daten.nachname,
-          geburtsdatum: daten.geburtsdatum || undefined,
           kontotyp: daten.kontotyp,
           firma: daten.firma || undefined,
         },
