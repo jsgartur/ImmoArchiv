@@ -89,13 +89,43 @@ function Datenschutz() {
 
       <LegalSection heading="6. KI-Assistent (optional)">
         <p>
-          ImmoArchiv bietet optional einen KI-Assistenten auf Basis der Claude-API von Anthropic PBC. Wenn Sie
-          diese Funktion aktivieren und einen eigenen API-Schlüssel hinterlegen, werden Ihre Frage sowie ein
-          zusammengefasster Auszug Ihrer Portfolio-Daten (z. B. Objektadressen, Finanzkennzahlen) direkt von Ihrem
-          Browser an die Anthropic-API übermittelt, um eine Antwort zu erzeugen. Ihr API-Schlüssel wird nur lokal
-          in Ihrem Browser gespeichert. Die Nutzung erfolgt freiwillig auf Ihre Veranlassung (Art. 6 Abs. 1 lit. a
-          DSGVO, Einwilligung durch aktive Nutzung). Ohne Aktivierung dieser Funktion findet keine Übermittlung an
-          Anthropic statt.
+          ImmoArchiv bietet optional einen KI-Assistenten auf Basis der Claude-API von Anthropic PBC, 548 Market
+          St, San Francisco, USA („Anthropic"). Die Funktion ist standardmäßig deaktiviert und wird nur aktiv,
+          wenn Sie selbst einen eigenen Anthropic-API-Schlüssel hinterlegen.
+        </p>
+        <p className="mt-2">
+          <strong>Welche Daten:</strong> Ihre eingegebene Frage sowie ein automatisch zusammengefasster Auszug
+          Ihrer Portfolio-Kennzahlen (u. a. Objektadressen, Kaufpreise/Marktwerte, Miet- und Cashflow-Kennzahlen,
+          Titel offener Mängel und Aufgaben, Ihr eigener Name). Enthält ein Mangel- oder Aufgabentitel personen­
+          bezogene Angaben zu Ihren Mietern (z. B. weil Sie den Namen im Titel erwähnen), werden auch diese mit
+          übertragen — vermeiden Sie das, indem Sie Mieternamen nicht in Mangel-/Aufgabentiteln nennen, falls Sie
+          das nicht wünschen.
+        </p>
+        <p className="mt-2">
+          <strong>Empfänger:</strong> Anthropic PBC (USA) als eigenständiger Verantwortlicher für die
+          Verarbeitung im Rahmen seiner API. <strong>Übertragungsweg:</strong> direkt von Ihrem Browser an die
+          Anthropic-API, nicht über unsere Server. <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO
+          (Einwilligung durch die aktive, freiwillige Aktivierung samt eigenem API-Schlüssel).
+        </p>
+        <p className="mt-2">
+          <strong>Drittlandübermittlung:</strong> Da Anthropic in den USA ansässig ist, findet eine Übermittlung
+          in ein Drittland statt. Nach den zum Zeitpunkt dieser Erklärung veröffentlichten Angaben von Anthropic
+          werden über die API übermittelte Daten nicht standardmäßig zum Training der Modelle verwendet und nur
+          zeitlich begrenzt zu Sicherheits-/Missbrauchsprüfungszwecken vorgehalten; maßgeblich sind die jeweils
+          aktuellen{" "}
+          <a href="https://www.anthropic.com/legal/privacy" className="underline underline-offset-2 hover:text-foreground" target="_blank" rel="noreferrer">
+            Datenschutzhinweise
+          </a>{" "}
+          und{" "}
+          <a href="https://www.anthropic.com/legal/commercial-terms" className="underline underline-offset-2 hover:text-foreground" target="_blank" rel="noreferrer">
+            Nutzungsbedingungen von Anthropic
+          </a>
+          , die wir selbst nicht beeinflussen können. Da Sie den API-Schlüssel und damit den Vertrag mit Anthropic
+          selbst abschließen, sind Sie insoweit gegenüber Anthropic in eigener Verantwortung tätig.
+        </p>
+        <p className="mt-2">
+          Ihr API-Schlüssel wird ausschließlich lokal in Ihrem Browser gespeichert, nie an unsere Server
+          übertragen. Ohne Aktivierung dieser Funktion findet keine Übermittlung an Anthropic statt.
         </p>
       </LegalSection>
 

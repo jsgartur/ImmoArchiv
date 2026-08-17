@@ -8,11 +8,6 @@ export const Route = createFileRoute("/agb")({
 function Agb() {
   return (
     <LegalLayout title="Allgemeine Geschäftsbedingungen">
-      <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
-        Hinweis: Dies ist eine Vorlage. Lassen Sie sie im Zweifel rechtlich prüfen, bevor Sie sie verwenden –
-        insbesondere die Widerrufsbelehrung sollte vor dem Start echter Zahlungen anwaltlich gegengelesen werden.
-      </p>
-
       <LegalSection heading="1. Geltungsbereich">
         <p>
           Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Software ImmoArchiv, angeboten
