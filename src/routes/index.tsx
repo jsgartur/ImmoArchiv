@@ -535,11 +535,11 @@ function Landing() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border bg-background p-5 text-center">
-              <div className="text-sm font-medium">Rechenzentrum in der EU</div>
-              <p className="mt-1 text-xs text-muted-foreground">Kein Datentransfer außerhalb der EU.</p>
+              <div className="text-sm font-medium">Datenbank-Standort EU</div>
+              <p className="mt-1 text-xs text-muted-foreground">Gehostet in Irland (eu-west-1).</p>
             </div>
             <div className="rounded-xl border bg-background p-5 text-center">
-              <div className="text-sm font-medium">DSGVO-konform</div>
+              <div className="text-sm font-medium">Für datenschutzkonforme Verwaltung entwickelt</div>
               <p className="mt-1 text-xs text-muted-foreground">Inklusive AVV für Ihre Mieterdaten.</p>
             </div>
             <div className="rounded-xl border bg-background p-5 text-center">

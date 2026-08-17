@@ -8,11 +8,6 @@ export const Route = createFileRoute("/datenschutz")({
 function Datenschutz() {
   return (
     <LegalLayout title="Datenschutzerklärung">
-      <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
-        Hinweis: Dies ist eine Vorlage. Passen Sie die Angaben an Ihre tatsächliche Datenverarbeitung an und lassen
-        Sie sie im Zweifel rechtlich prüfen.
-      </p>
-
       <LegalSection heading="1. Überblick">
         <p>
           Der Schutz Ihrer persönlichen Daten ist uns wichtig. ImmoArchiv ist eine cloudbasierte Anwendung: Ihre
@@ -57,8 +52,21 @@ function Datenschutz() {
         <p>
           Wir setzen für Datenbank, Authentifizierung und Datei-Speicherung den Dienst{" "}
           <strong>Supabase</strong> (Supabase Inc.) als Auftragsverarbeiter im Sinne von Art. 28 DSGVO ein. Mit
-          Supabase besteht ein Auftragsverarbeitungsvertrag. Serverstandort: eu-west-1 (Irland, EU).
-          Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO (Vertragserfüllung, sicherer Betrieb).
+          Supabase besteht ein Auftragsverarbeitungsvertrag. Der von uns gewählte Datenbank-Serverstandort ist
+          eu-west-1 (Irland, EU). Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO (Vertragserfüllung,
+          sicherer Betrieb).
+        </p>
+        <p className="mt-2">
+          Für das Hosting der Web-Anwendung selbst (Auslieferung der Seiten) setzen wir <strong>Vercel Inc.</strong>{" "}
+          ein, für den Versand von Transaktions-E-Mails (Bestätigungs-, Passwort-Reset- und Benachrichtigungs-
+          E-Mails) <strong>Resend</strong>. Mit beiden Anbietern bestehen Auftragsverarbeitungsverträge.
+        </p>
+        <p className="mt-2">
+          Bei diesen Anbietern kann es vorkommen, dass Verarbeitungsschritte oder eingesetzte Unterauftrag­nehmer
+          (z. B. Content-Delivery-Netzwerke) auch außerhalb der EU stattfinden bzw. sitzen. Soweit hierbei
+          personenbezogene Daten in Drittländer übermittelt werden, stellen wir dies über geeignete Garantien
+          sicher (insbesondere EU-Standardvertragsklauseln nach Art. 46 DSGVO). Eine Aussage, dass ausschließlich
+          eine Verarbeitung innerhalb der EU stattfindet, können wir daher nicht uneingeschränkt treffen.
         </p>
       </LegalSection>
 
@@ -128,10 +136,14 @@ function Datenschutz() {
         </p>
       </LegalSection>
 
-      <LegalSection heading="11. Kontakt">
+      <LegalSection heading="11. Kontakt und Aufsichtsbehörde">
         <p>
-          Bei Fragen zum Datenschutz erreichen Sie uns unter arturkraus2212@gmail.com. Sie haben zudem das Recht, sich bei
-          einer Datenschutz-Aufsichtsbehörde zu beschweren.
+          Bei Fragen zum Datenschutz erreichen Sie uns unter arturkraus2212@gmail.com. Sie haben zudem das Recht,
+          sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren, für uns zuständig ist:
+          <br />
+          Der Hessische Beauftragte für Datenschutz und Informationsfreiheit
+          <br />
+          Postfach 3163, 65021 Wiesbaden
         </p>
       </LegalSection>
 

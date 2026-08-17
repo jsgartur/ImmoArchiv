@@ -8,11 +8,6 @@ export const Route = createFileRoute("/avv")({
 function Avv() {
   return (
     <LegalLayout title="Auftragsverarbeitungsvertrag (AVV)">
-      <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
-        Hinweis: Dies ist eine Vorlage nach Art. 28 DSGVO. Passen Sie die Angaben an Ihr Unternehmen an und lassen
-        Sie den Vertrag im Zweifel rechtlich prüfen, bevor Sie ihn verwenden.
-      </p>
-
       <LegalSection heading="1. Worum es hier geht">
         <p>
           Wenn Sie ImmoArchiv nutzen, geben Sie Daten Ihrer Mieter ein (z. B. Name, Kontaktdaten, Mietvertrag,
@@ -74,6 +69,7 @@ function Avv() {
           <li>Unterstützung bei der Erfüllung von Betroffenenrechten (Auskunft, Berichtigung, Löschung) sowie bei Datenschutz-Folgenabschätzungen, soweit zumutbar</li>
           <li>Meldung von Datenschutzverletzungen (Art. 33 DSGVO) an den Verantwortlichen unverzüglich nach Bekanntwerden</li>
           <li>Löschung oder Rückgabe aller Daten nach Ende der Nutzung, soweit keine gesetzliche Aufbewahrungspflicht entgegensteht</li>
+          <li>Zugriff auf Ihre Daten zu Support-Zwecken ausschließlich auf Ihre eigene Veranlassung (z. B. bei einer Support-Anfrage) oder soweit zur Fehlerbehebung im Betrieb der Software technisch erforderlich</li>
         </ul>
       </LegalSection>
 
@@ -102,12 +98,23 @@ function Avv() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <strong>Supabase, Inc.</strong> – Hosting, Datenbank, Authentifizierung und Datei-Speicherung.
-            Serverstandort: eu-west-1 (Irland, EU). Mit Supabase besteht ein eigener Auftragsverarbeitungsvertrag
-            (Data Processing Agreement, siehe supabase.com/legal/dpa).
+            Gewählter Datenbank-Serverstandort: eu-west-1 (Irland, EU). Mit Supabase besteht ein eigener
+            Auftragsverarbeitungsvertrag (Data Processing Agreement, siehe supabase.com/legal/dpa).
+          </li>
+          <li>
+            <strong>Vercel Inc.</strong> – Hosting/Auslieferung der Web-Anwendung.
+          </li>
+          <li>
+            <strong>Resend</strong> – Versand von Transaktions-E-Mails (Bestätigungs-, Passwort-Reset- und
+            Benachrichtigungs-E-Mails).
           </li>
         </ul>
         <p className="mt-2">
-          Der Verantwortliche stimmt dem Einsatz dieses Unterauftragsverarbeiters zu. Über den Wechsel oder die
+          Bei diesen Anbietern kann eine Verarbeitung teilweise auch außerhalb der EU stattfinden; in diesem Fall
+          stellen wir geeignete Garantien sicher (insbesondere EU-Standardvertragsklauseln nach Art. 46 DSGVO).
+        </p>
+        <p className="mt-2">
+          Der Verantwortliche stimmt dem Einsatz dieser Unterauftragsverarbeiter zu. Über den Wechsel oder die
           Hinzuziehung weiterer Unterauftragsverarbeiter wird der Verantwortliche vorab informiert und kann
           innerhalb einer angemessenen Frist widersprechen. Sofern Sie den optionalen KI-Assistenten mit eigenem
           API-Schlüssel aktivieren, übermitteln Sie die dabei ausgewählten Portfoliodaten selbst und auf eigene
