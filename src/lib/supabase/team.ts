@@ -54,16 +54,7 @@ export function invalidiereEigentuemerCache() {
 
 /** Nimmt eine offene Einladung an, deren E-Mail zum gerade angemeldeten Nutzer passt. */
 export async function nimmEinladungAn() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user?.email) return;
-  await supabase
-    .from("team_mitglieder")
-    .update({ user_id: user.id, status: "aktiv" })
-    .eq("email", user.email)
-    .eq("status", "eingeladen")
-    .is("user_id", null);
+  await supabase.rpc("nimm_einladung_an");
   invalidiereEigentuemerCache();
 }
 
