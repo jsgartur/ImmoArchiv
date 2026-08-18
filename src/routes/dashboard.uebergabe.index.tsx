@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { ScrollReveal as Reveal } from "@/components/scroll-reveal";
 import { Plus, ClipboardList, LogIn, LogOut as LogOutIcon } from "lucide-react";
 import { useStore, fmtDate, type UebergabeTyp } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ function UebergabeListe() {
   const sortiert = protokolle.slice().sort((a, b) => b.datum.localeCompare(a.datum));
 
   return (
-    <div className="space-y-6">
+    <Reveal className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Übergabeprotokolle</h1>
@@ -252,6 +253,6 @@ function UebergabeListe() {
           })}
         </div>
       )}
-    </div>
+    </Reveal>
   );
 }

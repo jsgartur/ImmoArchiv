@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { ScrollReveal as Reveal } from "@/components/scroll-reveal";
 import { Plus, FileSpreadsheet, ArrowRight, Trash2 } from "lucide-react";
 import {
   useStore,
@@ -185,7 +186,7 @@ function NebenkostenListe() {
   }
 
   return (
-    <div className="space-y-6">
+    <Reveal className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
@@ -267,6 +268,6 @@ function NebenkostenListe() {
           ))}
         </div>
       )}
-    </div>
+    </Reveal>
   );
 }

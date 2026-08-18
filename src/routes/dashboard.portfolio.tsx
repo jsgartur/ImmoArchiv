@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ScrollReveal as Reveal } from "@/components/scroll-reveal";
 import {
   Wallet,
   TrendingUp,
@@ -120,7 +121,7 @@ function Portfolio() {
     .filter((d) => d.value > 0);
 
   return (
-    <div className="space-y-6">
+    <Reveal className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Portfolioübersicht</h1>
         <p className="text-sm text-muted-foreground">
@@ -291,6 +292,6 @@ function Portfolio() {
         Kaufpreis verwendet. Die Vermögensprognose nimmt einen gleichbleibenden Wert an und
         berücksichtigt keine Wertsteigerung.
       </p>
-    </div>
+    </Reveal>
   );
 }

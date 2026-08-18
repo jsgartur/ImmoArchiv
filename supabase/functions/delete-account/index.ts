@@ -2,8 +2,10 @@
 //
 // Braucht den service_role-Key (nur serverseitig als Secret, niemals im Client!), da nur
 // er berechtigt ist, auth.users-Zeilen zu löschen. Alle abhängigen Zeilen (profiles, objekte,
-// einheiten, mieter, … sowie Storage-Dateien) hängen per ON DELETE CASCADE an auth.users
-// bzw. an die kaskadierenden Tabellen und werden automatisch mitgelöscht.
+// einheiten, mieter, …) hängen per ON DELETE CASCADE an auth.users bzw. an die kaskadierenden
+// Tabellen und werden automatisch mitgelöscht. Storage-Dateien hängen NICHT an dieser Kaskade
+// (Storage-Objekte sind kein Postgres-Fremdschlüssel) und werden hier explizit vor dem
+// Löschen des Kontos entfernt, alle Buckets folgen der Konvention "erster Pfad-Ordner = user_id".
 //
 // Deployment (einmalig, im Supabase-Dashboard oder per CLI):
 //   supabase functions deploy delete-account
@@ -12,12 +14,40 @@
 // Aufruf aus dem Client: supabase.functions.invoke("delete-account")
 // (der Aufruf sendet automatisch den Bearer-Token des angemeldeten Nutzers mit).
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+/**
+ * Löscht rekursiv alle Dateien unter einem Ordnerpfad in einem Storage-Bucket. Supabase Storage
+ * listet nur eine Ebene pro Aufruf – Unterordner (z. B. objekt-bilder/{userId}/{objektId}/...)
+ * werden daher per Tiefensuche eingesammelt, bevor am Ende alle gefundenen Dateipfade auf einmal
+ * gelöscht werden. Fehler werden bewusst verschluckt (best effort), damit ein Storage-Problem
+ * das eigentliche Konto-Löschen nicht blockiert.
+ */
+async function loescheOrdnerRekursiv(client: SupabaseClient, bucket: string, pfad: string): Promise<void> {
+  try {
+    const { data, error } = await client.storage.from(bucket).list(pfad, { limit: 1000 });
+    if (error || !data || data.length === 0) return;
+
+    const dateien: string[] = [];
+    const unterordner: string[] = [];
+    for (const eintrag of data) {
+      const vollerPfad = `${pfad}/${eintrag.name}`;
+      // Ordner haben bei Supabase Storage kein "id"-Feld, Dateien schon.
+      if (eintrag.id === null) unterordner.push(vollerPfad);
+      else dateien.push(vollerPfad);
+    }
+
+    await Promise.all(unterordner.map((u) => loescheOrdnerRekursiv(client, bucket, u)));
+    if (dateien.length > 0) await client.storage.from(bucket).remove(dateien);
+  } catch {
+    // best effort – Storage-Fehler sollen das Konto-Löschen nicht verhindern
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -53,6 +83,11 @@ Deno.serve(async (req) => {
 
   // Admin-Client mit service_role – einzig berechtigt, das Konto zu löschen.
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+  // Storage-Dateien des Nutzers vor dem Konto-Löschen entfernen (kein automatischer Cascade).
+  const buckets = ["dokumente", "objekt-bilder", "mangel-fotos", "avatare"];
+  await Promise.all(buckets.map((bucket) => loescheOrdnerRekursiv(adminClient, bucket, user.id)));
+
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
 
   if (deleteError) {

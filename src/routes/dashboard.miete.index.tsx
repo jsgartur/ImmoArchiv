@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { ScrollReveal as Reveal } from "@/components/scroll-reveal";
 import { Building2, KeyRound, Pencil, Plus, Users } from "lucide-react";
 import { useStore, fmtDate, type Objekt, type Einheit, type Mieter } from "@/lib/store";
 import { LadeSkeleton } from "@/components/lade-skeleton";
@@ -260,7 +261,7 @@ function Mietverhaeltnisse() {
   const vermietet = zeilen.filter((z) => z.mieter).length;
 
   return (
-    <div className="space-y-6">
+    <Reveal className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Mietverhältnisse</h1>
@@ -368,6 +369,6 @@ function Mietverhaeltnisse() {
           </div>
         </>
       )}
-    </div>
+    </Reveal>
   );
 }

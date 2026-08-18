@@ -94,12 +94,16 @@ function Agb() {
           bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen wurde ausdrücklich etwas
           anderes vereinbart.
         </p>
-        <p className="mt-2 font-medium text-foreground">Vorzeitiges Erlöschen des Widerrufsrechts</p>
+        <p className="mt-2 font-medium text-foreground">Wertersatz bei vorzeitigem Widerruf</p>
         <p>
-          Haben Sie ausdrücklich zugestimmt, dass wir mit der Ausführung der Dienstleistung (Freischaltung des
-          kostenpflichtigen Plans) bereits vor Ablauf der Widerrufsfrist beginnen, und haben Sie Ihre Kenntnis
-          davon bestätigt, dass Sie durch diese Zustimmung mit Beginn der Ausführung Ihr Widerrufsrecht verlieren,
-          sobald wir den Vertrag vollständig erfüllt haben, erlischt Ihr Widerrufsrecht in diesem Fall vorzeitig.
+          ImmoArchiv ist ein fortlaufendes Abonnement (Dauerschuldverhältnis), keine einmalige Lieferung digitaler
+          Inhalte. Ihr Widerrufsrecht besteht daher auch dann fort, wenn Sie den kostenpflichtigen Plan bereits
+          nutzen. Haben Sie uns ausdrücklich zugestimmt, dass wir mit der Erbringung der Dienstleistung bereits vor
+          Ablauf der Widerrufsfrist beginnen, und widerrufen Sie den Vertrag dennoch innerhalb der Frist, sind Sie
+          gemäß § 357 Abs. 8 BGB verpflichtet, uns für den Teil der Dienstleistung, den wir bis zu Ihrem Widerruf
+          bereits erbracht haben, einen angemessenen Betrag zu zahlen. Dieser Betrag bemisst sich anteilig nach dem
+          vereinbarten Gesamtpreis im Verhältnis zum bereits genutzten Zeitraum. Allein durch den Beginn der Nutzung
+          erlischt Ihr Widerrufsrecht bei einem laufenden Abonnement nicht vollständig.
         </p>
       </LegalSection>
 

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { ScrollReveal as Reveal } from "@/components/scroll-reveal";
 import {
   Plus,
   Trash2,
@@ -297,7 +298,7 @@ function Aufgaben() {
   }
 
   return (
-    <div className="space-y-6">
+    <Reveal className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Aufgaben & Fristen</h1>
         <p className="text-sm text-muted-foreground">
@@ -445,6 +446,6 @@ function Aufgaben() {
           )}
         </div>
       )}
-    </div>
+    </Reveal>
   );
 }
